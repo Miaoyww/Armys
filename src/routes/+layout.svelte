@@ -1,12 +1,8 @@
 <script lang="ts">
 	import '../app.css';
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import AppSidebar from '$lib/components/sidebar/left-sidebar.svelte';
 	import Header from '$lib/components/header.svelte';
-	import { cn } from '$lib/utils';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
 	import RightSidebar from '$lib/components/sidebar/right-sidebar.svelte';
-	import { coords } from '$lib/stores/map-store';
 	import Bottom from '$lib/components/bottom.svelte';
 	import UnitPro from '$lib/components/unit-pro.svelte';
 	import LeftSidebar from '$lib/components/sidebar/left-sidebar.svelte';

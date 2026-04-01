@@ -3,7 +3,6 @@
 	import { Pin, PinOff } from '@lucide/svelte';
 	import { rightBarPinned } from '$lib/stores/sidebar-store';
 	import { animate } from 'animejs';
-	import PinOnOff from '$lib/assets/icons/pin-on-off.svg';
 
 	let slashEl: SVGGElement;
 
