@@ -143,7 +143,7 @@ export function updateFaction(factionId: string, updates: Partial<Pick<Faction, 
 }
 
 export function selectFaction(factionId: string) {
-	currentFactionId.set(factionId);
+	currentFactionId.update((current) => (current === factionId ? null : factionId));
 }
 
 // ============ 单位 CRUD ============

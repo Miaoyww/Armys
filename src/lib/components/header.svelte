@@ -20,7 +20,8 @@
 		currentBattle,
 		currentFaction,
 		selectedPlacedUnit,
-		interactionMode
+		interactionMode,
+		selectFaction
 	} from '$lib/stores/battle-store';
 
 	type InputType = Exclude<HTMLInputTypeAttribute, 'file'>;
@@ -32,6 +33,7 @@
 	let { class: className, ...restProps }: Props = $props();
 
 	function togglePin() {
+		selectFaction(null);
 		leftBarPinned.update((prev) => !prev);
 	}
 
