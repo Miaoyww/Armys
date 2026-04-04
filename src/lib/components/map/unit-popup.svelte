@@ -42,7 +42,7 @@
 	<!-- ── 标题区：北约图标 + 名称 ── -->
 	<div class="flex items-center gap-3 pb-2">
 		<div class="flex-shrink-0 drop-shadow-md">
-			<NatoSymbol type={natoType} {side} size={52} />
+			<NatoSymbol type={natoType} {side} size={52} color={faction.color} />
 		</div>
 		<div class="min-w-0 flex-1">
 			<p class="truncate text-sm font-bold leading-tight text-stone-900">{unit.name}</p>

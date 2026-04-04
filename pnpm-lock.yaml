@@ -23,6 +23,9 @@ importers:
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
+      milsymbol:
+        specifier: ^3.0.4
+        version: 3.0.4
       sveaflet:
         specifier: ^0.1.4
         version: 0.1.4(@algolia/client-search@5.40.1)(leaflet@1.9.4)(search-insights@2.17.3)(svelte@5.40.2)
@@ -1168,6 +1171,9 @@ packages:
   meriyah@4.5.0:
     resolution: {integrity: sha512-Rbiu0QPIxTXgOXwiIpRVJfZRQ2FWyfzYrOGBs9SN5RbaXg1CN5ELn/plodwWwluX93yzc4qO/bNIen1ThGFCxw==}
     engines: {node: '>=10.4.0'}
+
+  milsymbol@3.0.4:
+    resolution: {integrity: sha512-Jrs1RBCag2IzyEJwI476i2+pNHdi8WMwAp2mDD23g3TR48ERdHmdQgPXZUosRKyhPMr58/eOPyyLE53lMPPAgw==}
 
   mini-svg-data-uri@1.4.4:
     resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
@@ -2549,6 +2555,8 @@ snapshots:
       upath: 2.0.1
 
   meriyah@4.5.0: {}
+
+  milsymbol@3.0.4: {}
 
   mini-svg-data-uri@1.4.4: {}
 
