@@ -5,6 +5,17 @@
 	import logo from '$lib/assets/logo.svg';
 	import { page } from '$app/state';
 	let { children } = $props();
+
+	// Vercel Analytics
+	import { dev } from '$app/environment';
+	import { injectAnalytics } from '@vercel/analytics/sveltekit';
+
+	injectAnalytics({ mode: dev ? 'development' : 'production' });
+
+	// Vercel Speed Insights
+	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+
+	injectSpeedInsights();
 </script>
 
 <svelte:head>

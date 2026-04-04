@@ -51,6 +51,8 @@
 	},
 	"dependencies": {
 		"@types/geojson": "^7946.0.16",
+		"@vercel/analytics": "^2.0.1",
+		"@vercel/speed-insights": "^2.0.0",
 		"animejs": "^4.2.2",
 		"leaflet": "^1.9.4",
 		"sveaflet": "^0.1.4"
