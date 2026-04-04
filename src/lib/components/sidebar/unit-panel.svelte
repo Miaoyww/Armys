@@ -34,7 +34,8 @@
 		BomberQuality,
 		AirForceSupportType,
 		AirSupportQuality,
-		Branch
+		Branch,
+		UnitSide
 	} from '$lib/types';
 	import {
 		BRANCH_LABELS,
@@ -101,11 +102,13 @@
 	let editingFaction = $state(false);
 	let factionEditName = $state('');
 	let factionEditColor = $state('');
+	let factionEditSide = $state<UnitSide>('blue');
 
 	function startEditFaction() {
 		if (!$currentFaction) return;
 		factionEditName = $currentFaction.name;
 		factionEditColor = $currentFaction.color;
+		factionEditSide = $currentFaction.side ?? 'blue';
 		editingFaction = true;
 	}
 
@@ -113,7 +116,7 @@
 		if (!$currentFactionId) return;
 		const name = factionEditName.trim();
 		if (!name) return;
-		updateFaction($currentFactionId, { name, color: factionEditColor });
+		updateFaction($currentFactionId, { name, color: factionEditColor, side: factionEditSide });
 		editingFaction = false;
 	}
 
@@ -439,24 +442,37 @@
 							bind:value={factionEditColor}
 							class="h-7 w-10 cursor-pointer rounded border border-input bg-transparent p-0.5"
 						/>
-						<div class="ml-auto flex gap-1.5">
-							<Button
-								variant="ghost"
-								size="sm"
-								class="h-7 px-2 text-xs text-muted-foreground"
-								onclick={() => (editingFaction = false)}
-							>
-								<X class="mr-1 size-3" />取消
-							</Button>
-							<Button
-								size="sm"
-								class="h-7 px-2 text-xs"
-								onclick={saveEditFaction}
-								disabled={!factionEditName.trim()}
-							>
-								<Check class="mr-1 size-3" />保存
-							</Button>
+					</div>
+				<div class="flex items-center gap-2">
+						<Label class="shrink-0 text-xs text-muted-foreground">立场</Label>
+						<div class="flex gap-1.5">
+							{#each [{ v: 'blue' as UnitSide, l: '蓝方', c: '#1d4ed8' }, { v: 'red' as UnitSide, l: '红方', c: '#dc2626' }, { v: 'neutral' as UnitSide, l: '中立', c: '#16a34a' }] as opt}
+								<button
+									type="button"
+									class="rounded border px-2 py-0.5 text-[11px] font-medium transition-all {factionEditSide === opt.v ? 'border-transparent text-white' : 'border-stone-200 text-stone-500 hover:border-stone-400'}"
+									style="{factionEditSide === opt.v ? `background:${opt.c}` : ''}"
+									onclick={() => (factionEditSide = opt.v)}
+								>{opt.l}</button>
+							{/each}
 						</div>
+					</div>
+					<div class="flex justify-end gap-1.5">
+						<Button
+							variant="ghost"
+							size="sm"
+							class="h-7 px-2 text-xs text-muted-foreground"
+							onclick={() => (editingFaction = false)}
+						>
+							<X class="mr-1 size-3" />取消
+						</Button>
+						<Button
+							size="sm"
+							class="h-7 px-2 text-xs"
+							onclick={saveEditFaction}
+							disabled={!factionEditName.trim()}
+						>
+							<Check class="mr-1 size-3" />保存
+						</Button>
 					</div>
 				</div>
 			{:else}

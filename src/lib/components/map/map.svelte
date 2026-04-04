@@ -31,7 +31,7 @@
 		applyPendingRoute,
 		cancelPendingRoute
 	} from '$lib/stores/pending-route.store';
-	import type { MilitaryUnit, PlacedUnit, Faction } from '$lib/types';
+	import type { MilitaryUnit, PlacedUnit, Faction, NatoUnitType, UnitSide } from '$lib/types';
 
 	let map: L.Map;
 	let myOpen = $state(false);
@@ -84,29 +84,96 @@
 		return null;
 	}
 
-	// 获取军种图标
-	function getBranchIcon(branch: string, color: string): L.DivIcon {
-		const icons: Record<string, string> = {
-			army: '🪖',
-			navy: '⚓',
-			air_force: '✈️'
+	// 从 MilitaryUnit 推导北约单位类型
+	function deriveNatoType(unit: MilitaryUnit): NatoUnitType {
+		if (unit.branch === 'navy') return 'navy';
+		if (unit.branch === 'air_force') return 'aviation';
+		// 陆军：按主力组成决定类型
+		const armorCount = unit.armor.reduce((s, c) => s + c.count, 0);
+		const infantryCount = unit.infantry.reduce((s, c) => s + c.count, 0);
+		const missileCount = unit.missiles.reduce((s, c) => s + c.count, 0);
+		if (missileCount > armorCount && missileCount > infantryCount) return 'artillery';
+		if (armorCount > 0 && infantryCount > 0) return 'mechanized';
+		if (armorCount > infantryCount) return 'armor';
+		return 'infantry';
+	}
+
+	// 生成北约风格 DivIcon（含 HP/Org 进度条）
+	function getNatoIcon(
+		unit: MilitaryUnit,
+		faction: Faction,
+		placed: PlacedUnit,
+		selected: boolean
+	): L.DivIcon {
+		const side: UnitSide = faction.side ?? 'blue';
+		const natoType: NatoUnitType = placed.natoType ?? deriveNatoType(unit);
+
+		const frameStroke: Record<UnitSide, string> = {
+			blue: '#1d4ed8',
+			red: '#dc2626',
+			neutral: '#16a34a'
 		};
+		const frameFill: Record<UnitSide, string> = {
+			blue: 'rgba(219,234,254,0.92)',
+			red: 'rgba(254,226,226,0.92)',
+			neutral: 'rgba(220,252,231,0.92)'
+		};
+
+		const sc = frameStroke[side];
+		const fc = frameFill[side];
+
+		// 内部北约符号 SVG 片段
+		const symMap: Record<NatoUnitType, string> = {
+			infantry: `<line x1="10" y1="8" x2="34" y2="24" stroke="${sc}" stroke-width="2.5" stroke-linecap="round"/>
+				<line x1="34" y1="8" x2="10" y2="24" stroke="${sc}" stroke-width="2.5" stroke-linecap="round"/>`,
+			armor: `<ellipse cx="22" cy="16" rx="11" ry="6.5" stroke="${sc}" stroke-width="2.5" fill="none"/>`,
+			artillery: `<circle cx="22" cy="16" r="7" fill="${sc}"/>`,
+			mechanized: `<ellipse cx="22" cy="16" rx="11" ry="6" stroke="${sc}" stroke-width="1.8" fill="none"/>
+				<line x1="13" y1="10" x2="31" y2="22" stroke="${sc}" stroke-width="1.8" stroke-linecap="round"/>
+				<line x1="31" y1="10" x2="13" y2="22" stroke="${sc}" stroke-width="1.8" stroke-linecap="round"/>`,
+			aviation: `<path d="M8,24 Q22,5 36,24" stroke="${sc}" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+				<circle cx="22" cy="12" r="3" fill="${sc}"/>`,
+			navy: `<path d="M7,12 Q14.5,8 22,12 Q29.5,16 37,12" stroke="${sc}" stroke-width="2" stroke-linecap="round" fill="none"/>
+				<path d="M7,20 Q14.5,16 22,20 Q29.5,24 37,20" stroke="${sc}" stroke-width="2" stroke-linecap="round" fill="none"/>`,
+			headquarters: `<line x1="8" y1="12" x2="36" y2="12" stroke="${sc}" stroke-width="2.5" stroke-linecap="round"/>
+				<line x1="8" y1="20" x2="36" y2="20" stroke="${sc}" stroke-width="2.5" stroke-linecap="round"/>`
+		};
+
+		const frame =
+			side === 'red'
+				? `<polygon points="22,1.5 42.5,16 22,30.5 1.5,16" fill="${fc}" stroke="${sc}" stroke-width="2.2" stroke-linejoin="round"/>`
+				: `<rect x="1.5" y="1.5" width="41" height="29" rx="1.5" fill="${fc}" stroke="${sc}" stroke-width="2.2"/>`;
+
+		// 进度条
+		const hpPct = placed.maxHp > 0 ? Math.max(0, Math.min(1, placed.hp / placed.maxHp)) : 1;
+		const orgPct = placed.maxOrg > 0 ? Math.max(0, Math.min(1, placed.org / placed.maxOrg)) : 1;
+		const hpW = Math.round(44 * hpPct);
+		const orgW = Math.round(44 * orgPct);
+		const hpColor = hpPct > 0.5 ? '#22c55e' : hpPct > 0.25 ? '#f59e0b' : '#ef4444';
+
+		const selRing = selected
+			? `<circle cx="22" cy="16" r="20" fill="none" stroke="${sc}" stroke-width="2" stroke-dasharray="4 3" opacity="0.6"/>`
+			: '';
+
+		const html = `<div style="display:flex;flex-direction:column;align-items:center;width:44px;pointer-events:none;">
+			<svg width="44" height="32" viewBox="0 0 44 32" fill="none" xmlns="http://www.w3.org/2000/svg"
+				style="filter:drop-shadow(0 2px 5px rgba(0,0,0,0.4));">
+				${selRing}
+				${frame}
+				${symMap[natoType] ?? ''}
+			</svg>
+			<div style="width:44px;height:4px;background:rgba(0,0,0,0.18);border-radius:2px;margin-top:2px;overflow:hidden;">
+				<div style="width:${hpW}px;height:4px;background:${hpColor};border-radius:2px;"></div>
+			</div>
+			<div style="width:44px;height:4px;background:rgba(0,0,0,0.18);border-radius:2px;margin-top:2px;overflow:hidden;">
+				<div style="width:${orgW}px;height:4px;background:#eab308;border-radius:2px;"></div>
+			</div>
+		</div>`;
+
 		return L.divIcon({
-			html: `<div style="
-				background: ${color};
-				border: 2px solid white;
-				border-radius: 50%;
-				width: 32px;
-				height: 32px;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				font-size: 16px;
-				box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-				cursor: pointer;
-			">${icons[branch] || '⚔️'}</div>`,
-			iconSize: [32, 32],
-			iconAnchor: [16, 16],
+			html,
+			iconSize: [44, 46],
+			iconAnchor: [22, 22],
 			className: ''
 		});
 	}
@@ -131,7 +198,7 @@
 
 			// 标记
 			const marker = L.marker([placed.lat, placed.lng], {
-				icon: getBranchIcon(unit.branch, faction.color),
+				icon: getNatoIcon(unit, faction, placed, placed.id === $selectedPlacedUnitId),
 				draggable: $interactionMode === 'select'
 			});
 
@@ -171,19 +238,6 @@
 
 			markersMap[placed.id] = marker;
 			markersLayer.addLayer(marker);
-
-			// 高亮选中
-			if (placed.id === $selectedPlacedUnitId) {
-				const highlight = L.circleMarker([placed.lat, placed.lng], {
-					radius: 20,
-					color: faction.color,
-					weight: 2,
-					fillColor: faction.color,
-					fillOpacity: 0.15,
-					dashArray: '4 4'
-				});
-				markersLayer.addLayer(highlight);
-			}
 
 			// 行动路线
 			if (placed.route.length > 0) {

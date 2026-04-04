@@ -3,6 +3,19 @@
 /** 军种 */
 export type Branch = 'army' | 'navy' | 'air_force';
 
+/** 阵营立场 */
+export type UnitSide = 'blue' | 'red' | 'neutral';
+
+/** 北约标准单位类型 */
+export type NatoUnitType =
+	| 'infantry'
+	| 'armor'
+	| 'artillery'
+	| 'mechanized'
+	| 'aviation'
+	| 'navy'
+	| 'headquarters';
+
 /** 陆军单位类型 */
 export type ArmyInfantryType = 'light' | 'mechanized' | 'airborne' | 'marine';
 export type ArmyArmorType = 'light_tank' | 'main_tank' | 'apc' | 'ifv';
@@ -141,6 +154,22 @@ export interface PlacedUnit {
 	strikeRadius: number;
 	/** 单位状态 */
 	status: 'idle' | 'moving' | 'attacking' | 'defending' | 'retreating';
+	/** 北约图标类型（覆盖自动推导） */
+	natoType?: NatoUnitType;
+	/** 生命值 */
+	hp: number;
+	maxHp: number;
+	/** 组织度 */
+	org: number;
+	maxOrg: number;
+	/** 攻击力 */
+	softAttack: number;
+	hardAttack: number;
+	airAttack: number;
+	/** 防御力 */
+	defense: number;
+	/** 移动速度 km/h */
+	speed: number;
 }
 
 // ============ 势力 ============
@@ -149,6 +178,8 @@ export interface Faction {
 	id: string;
 	name: string;
 	color: string;
+	/** 阵营立场（决定北约图标框架颜色） */
+	side: UnitSide;
 	/** 国旗URL(可选) */
 	flagUrl?: string;
 	units: MilitaryUnit[];
@@ -317,4 +348,20 @@ export const UNIT_STATUS_LABELS: Record<PlacedUnit['status'], string> = {
 	attacking: '攻击',
 	defending: '防御',
 	retreating: '撤退'
+};
+
+export const UNIT_SIDE_LABELS: Record<UnitSide, string> = {
+	blue: '蓝方',
+	red: '红方',
+	neutral: '中立'
+};
+
+export const NATO_UNIT_TYPE_LABELS: Record<NatoUnitType, string> = {
+	infantry: '步兵',
+	armor: '装甲',
+	artillery: '炮兵',
+	mechanized: '机械化',
+	aviation: '航空',
+	navy: '海军',
+	headquarters: '司令部'
 };

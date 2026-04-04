@@ -1,5 +1,5 @@
 import { writable, derived, get } from 'svelte/store';
-import type { Battle, Faction, MilitaryUnit, PlacedUnit, ActionLogEntry } from '$lib/types';
+import type { Battle, Faction, MilitaryUnit, PlacedUnit, ActionLogEntry, UnitSide } from '$lib/types';
 
 const STORAGE_KEY = 'wars_battles';
 
@@ -165,10 +165,10 @@ export function loadBattle(id: string) {
 
 // ============ 阵营 CRUD ============
 
-export function addFaction(name: string, color: string): string {
+export function addFaction(name: string, color: string, side: UnitSide = 'blue'): string {
 	pushUndoSnapshot(`添加阵营: ${name}`);
 	const id = generateId();
-	const faction: Faction = { id, name, color, units: [] };
+	const faction: Faction = { id, name, color, side, units: [] };
 	updateCurrentBattle((b) => ({
 		...b,
 		factions: [...b.factions, faction]
@@ -196,7 +196,7 @@ export function removeFaction(factionId: string) {
 	}
 }
 
-export function updateFaction(factionId: string, updates: Partial<Pick<Faction, 'name' | 'color' | 'flagUrl'>>) {
+export function updateFaction(factionId: string, updates: Partial<Pick<Faction, 'name' | 'color' | 'flagUrl' | 'side'>>) {
 	const battle = get(currentBattle);
 	const faction = battle?.factions.find((f) => f.id === factionId);
 	const oldName = faction?.name ?? '';
@@ -274,7 +274,16 @@ export function placeUnit(unitId: string, factionId: string, lat: number, lng: n
 		lng,
 		route: [],
 		strikeRadius: 0,
-		status: 'idle'
+		status: 'idle',
+		hp: 100,
+		maxHp: 100,
+		org: 100,
+		maxOrg: 100,
+		softAttack: 30,
+		hardAttack: 10,
+		airAttack: 5,
+		defense: 25,
+		speed: 8
 	};
 	updateCurrentBattle((b) => ({
 		...b,
