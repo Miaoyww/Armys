@@ -73,15 +73,15 @@ function updateCurrentBattle(updater: (battle: Battle) => Battle) {
 
 // ============ 战局 CRUD ============
 
-export function createBattle(name: string): string {
+export function createBattle(name: string, options?: { mapCenter?: [number, number]; mapZoom?: number }): string {
 	const id = generateId();
 	const battle: Battle = {
 		id,
 		name,
 		createdAt: Date.now(),
 		updatedAt: Date.now(),
-		mapCenter: [35, 105],
-		mapZoom: 5,
+		mapCenter: options?.mapCenter ?? [35, 105],
+		mapZoom: options?.mapZoom ?? 5,
 		factions: [],
 		placedUnits: [],
 		actionLog: []

@@ -3,7 +3,6 @@
 	import MyAlertDialog from '$lib/components/dialog/my-alert-dialog.svelte';
 	import { VETO_NAME } from '$lib/const';
 	import logo from '$lib/assets/logo.svg';
-	import { page } from '$app/state';
 	let { children } = $props();
 
 	// Vercel Analytics

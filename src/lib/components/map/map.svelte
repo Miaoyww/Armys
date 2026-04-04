@@ -4,8 +4,9 @@
 	import * as L from 'leaflet';
 	import { coords, zoom } from '$lib/stores/map-store';
 	import { ContextMenu, Portal } from 'bits-ui';
-	import { CirclePlus, Trash2, Route, Target, Eye, ArrowRightLeft } from '@lucide/svelte';
+	import { CirclePlus, Trash2, Route, Target, Eye, ArrowRightLeft, MapPin, Navigation, X } from '@lucide/svelte';
 	import * as Kbd from '$lib/components/ui/kbd/index.js';
+	import { Button } from '$lib/components/ui/button/index.js';
 	import {
 		currentBattle,
 		currentFactionId,
@@ -47,6 +48,33 @@
 
 	function setOpen(newOpen: boolean) {
 		myOpen = newOpen;
+	}
+
+	// 构建单位 Popup 内容节点
+	function createPopupElement(unit: MilitaryUnit, faction: Faction, placed: PlacedUnit): HTMLElement {
+		const wrap = document.createElement('div');
+		wrap.style.cssText = 'min-width: 160px; font-family: inherit; padding: 2px 0;';
+
+		const name = document.createElement('p');
+		name.style.cssText = 'font-weight: 600; font-size: 0.875rem; color: #1c1917; margin: 0 0 5px 0;';
+		name.textContent = unit.name;
+
+		const meta = document.createElement('p');
+		meta.style.cssText = 'font-size: 0.75rem; color: #78716c; margin: 0 0 3px 0; display: flex; align-items: center; gap: 5px;';
+		const dot = document.createElement('span');
+		dot.style.cssText = `color: ${faction.color}; font-size: 0.55rem; line-height: 1;`;
+		dot.textContent = '●';
+		meta.appendChild(dot);
+		meta.appendChild(document.createTextNode(`${faction.name} · ${BRANCH_LABELS[unit.branch]}`));
+
+		const statusEl = document.createElement('p');
+		statusEl.style.cssText = 'font-size: 0.75rem; color: #a8a29e; margin: 0;';
+		statusEl.textContent = `状态：${UNIT_STATUS_LABELS[placed.status]}`;
+
+		wrap.appendChild(name);
+		wrap.appendChild(meta);
+		wrap.appendChild(statusEl);
+		return wrap;
 	}
 
 	// 查找单位信息
@@ -111,13 +139,7 @@
 			});
 
 			// 弹出窗口
-			marker.bindPopup(`
-				<div style="min-width: 150px;">
-					<strong>${unit.name}</strong><br/>
-					<span style="color: ${faction.color};">●</span> ${faction.name} · ${BRANCH_LABELS[unit.branch]}<br/>
-					<small>状态: ${UNIT_STATUS_LABELS[placed.status]}</small>
-				</div>
-			`);
+			marker.bindPopup(createPopupElement(unit, faction, placed));
 
 			// 点击选中
 			marker.on('click', () => {
@@ -440,17 +462,30 @@
 
 	<!-- 交互模式提示 -->
 	{#if $interactionMode !== 'select'}
-		<div class="mode-banner">
-			{#if $interactionMode === 'place'}
-				📍 点击地图放置单位
-			{:else if $interactionMode === 'route'}
-				🗺️ 点击地图添加路线点 (右键结束)
-			{:else if $interactionMode === 'strike'}
-				🎯 点击地图设置打击范围
-			{/if}
-			<button class="cancel-btn" onclick={() => { interactionMode.set('select'); pendingPlaceUnitId.set(null); }}>
-				取消 (Esc)
-			</button>
+		<div class="absolute top-20 left-1/2 z-[1001] -translate-x-1/2">
+			<div class="flex items-center gap-3 rounded-xl border border-stone-200 bg-white/90 px-4 py-2.5 shadow-md backdrop-blur-sm">
+				{#if $interactionMode === 'place'}
+					<MapPin class="h-4 w-4 text-stone-600" />
+					<span class="text-sm text-stone-700">点击地图放置单位</span>
+				{:else if $interactionMode === 'route'}
+					<Navigation class="h-4 w-4 text-stone-600" />
+					<span class="text-sm text-stone-700">点击地图添加路线点（右键结束）</span>
+				{:else if $interactionMode === 'strike'}
+					<Target class="h-4 w-4 text-stone-600" />
+					<span class="text-sm text-stone-700">点击地图设置打击范围</span>
+				{/if}
+				<div class="mx-1 h-4 w-px bg-stone-200"></div>
+				<Button
+					variant="ghost"
+					size="sm"
+					class="h-7 gap-1.5 px-2 text-xs text-stone-500 hover:text-stone-800"
+					onclick={() => { interactionMode.set('select'); pendingPlaceUnitId.set(null); }}
+				>
+					<X class="h-3 w-3" />
+					取消
+					<Kbd.Root class="ml-0.5 text-[10px]">Esc</Kbd.Root>
+				</Button>
+			</div>
 		</div>
 	{/if}
 </div>
@@ -464,35 +499,3 @@
 	}}
 />
 
-<style>
-	.mode-banner {
-		position: absolute;
-		top: 80px;
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 1001;
-		background: rgba(0, 0, 0, 0.75);
-		color: white;
-		padding: 8px 20px;
-		border-radius: 8px;
-		font-size: 0.9rem;
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		backdrop-filter: blur(4px);
-	}
-
-	.cancel-btn {
-		background: rgba(255, 255, 255, 0.15);
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		color: white;
-		padding: 4px 12px;
-		border-radius: 6px;
-		cursor: pointer;
-		font-size: 0.8rem;
-	}
-
-	.cancel-btn:hover {
-		background: rgba(255, 255, 255, 0.25);
-	}
-</style>
