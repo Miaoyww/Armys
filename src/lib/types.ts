@@ -153,7 +153,7 @@ export interface PlacedUnit {
 	/** 打击范围半径(米) */
 	strikeRadius: number;
 	/** 单位状态 */
-	status: 'idle' | 'moving' | 'attacking' | 'defending' | 'retreating';
+	status: 'idle' | 'moving' | 'attacking' | 'defending' | 'retreating' | 'destroyed';
 	/** 北约图标类型（覆盖自动推导） */
 	natoType?: NatoUnitType;
 	/** 生命值 */
@@ -369,7 +369,8 @@ export const UNIT_STATUS_LABELS: Record<PlacedUnit['status'], string> = {
 	moving: '行军',
 	attacking: '攻击',
 	defending: '防御',
-	retreating: '撤退'
+	retreating: '撤退',
+	destroyed: '阵亡'
 };
 
 export const UNIT_SIDE_LABELS: Record<UnitSide, string> = {

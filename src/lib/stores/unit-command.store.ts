@@ -6,7 +6,7 @@
  */
 
 import { writable, get } from 'svelte/store';
-import { addRoutePoint, addLog } from './battle-store';
+import { addRoutePoint, addLog, runtimePositions } from './battle-store';
 
 export interface PendingCrisisCommand {
 	/** 目标 PlacedUnit 的 ID */
@@ -24,6 +24,7 @@ export const pendingCrisisCommand = writable<PendingCrisisCommand | null>(null);
 /**
  * 发布新路线节点指令。
  * 不写入路线，仅缓存等待确认。
+ * 阵亡单位（hp <= 0 或 status === 'destroyed'）拒绝接收指令。
  */
 export function issueCrisisCommand(
 	placedId: string,
@@ -31,6 +32,8 @@ export function issueCrisisCommand(
 	lat: number,
 	lng: number
 ) {
+	const pos = get(runtimePositions)[placedId];
+	if (pos && (pos.status === 'destroyed' || pos.hp <= 0)) return;
 	pendingCrisisCommand.set({ placedId, unitName, lat, lng });
 }
 

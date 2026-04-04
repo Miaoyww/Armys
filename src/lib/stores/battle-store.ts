@@ -482,6 +482,12 @@ export function tickMapMovement(deltaSimSec: number) {
 	runtimePositions.update((positions) => {
 		const next: Record<string, RuntimeUnitPosition> = {};
 		for (const [id, cur] of Object.entries(positions)) {
+			// 阵亡单位：维持状态，不移动
+			if (cur.status === 'destroyed' || cur.hp <= 0) {
+				next[id] = cur.status === 'destroyed' ? cur : { ...cur, status: 'destroyed', route: [], isEngaged: false };
+				continue;
+			}
+
 			if (cur.route.length === 0) {
 				// 已到达，状态置 idle
 				next[id] = cur.status === 'idle' ? cur : { ...cur, status: 'idle' };

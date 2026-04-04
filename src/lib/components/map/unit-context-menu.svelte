@@ -1,6 +1,18 @@
 <script lang="ts">
 	import { ContextMenu } from 'bits-ui';
-	import { Eye, LocateFixed, Route, RefreshCw, PlusCircle, ChevronRight, Eraser, Target, Activity, Trash2, Check } from '@lucide/svelte';
+	import {
+		Eye,
+		LocateFixed,
+		Route,
+		RefreshCw,
+		PlusCircle,
+		ChevronRight,
+		Eraser,
+		Target,
+		Activity,
+		Trash2,
+		Check
+	} from '@lucide/svelte';
 	import { UNIT_STATUS_LABELS } from '$lib/types';
 	import type { PlacedUnit } from '$lib/types';
 	import * as L from 'leaflet';
@@ -11,7 +23,8 @@
 		clearRoute,
 		updatePlacedUnit,
 		removePlacedUnit,
-		addLog
+		addLog,
+		runtimePositions
 	} from '$lib/stores/battle-store';
 	import { gameClock } from '$lib/stores/game-clock.store';
 	import { startPendingRoute } from '$lib/stores/pending-route.store';
@@ -35,10 +48,21 @@
 	const STATUS_LIST = ['idle', 'moving', 'attacking', 'defending', 'retreating'] as const;
 
 	let currentStatus = $derived(
-		$currentBattle?.placedUnits.find((u) => u.id === (contextUnitId || $selectedPlacedUnitId))?.status
+		$currentBattle?.placedUnits.find((u) => u.id === (contextUnitId || $selectedPlacedUnitId))
+			?.status
 	);
 
 	let hasUnit = $derived(!!(contextUnitId || $selectedPlacedUnitId));
+
+	let isDestroyed = $derived(
+		(() => {
+			const id = contextUnitId || $selectedPlacedUnitId;
+			if (!id) return false;
+			const rt = $runtimePositions[id];
+			if (rt) return rt.status === 'destroyed' || rt.hp <= 0;
+			return currentStatus === 'destroyed';
+		})()
+	);
 
 	function getOpen() {
 		return open;
@@ -77,8 +101,9 @@
 		if (targetId) {
 			selectedPlacedUnitId.set(targetId);
 			const placed = $currentBattle?.placedUnits.find((p) => p.id === targetId);
-			const unitName = $currentBattle?.factions.flatMap((f) => f.units)
-				.find((u) => u.id === placed?.unitId)?.name ?? '单位';
+			const unitName =
+				$currentBattle?.factions.flatMap((f) => f.units).find((u) => u.id === placed?.unitId)
+					?.name ?? '单位';
 			if (!$gameClock.isPaused) {
 				// 推演运行中：pending 预设流程，Esc 后再确认
 				startPendingRoute(targetId, unitName, 'reset');
@@ -99,8 +124,9 @@
 		if (targetId) {
 			selectedPlacedUnitId.set(targetId);
 			const placed = $currentBattle?.placedUnits.find((p) => p.id === targetId);
-			const unitName = $currentBattle?.factions.flatMap((f) => f.units)
-				.find((u) => u.id === placed?.unitId)?.name ?? '单位';
+			const unitName =
+				$currentBattle?.factions.flatMap((f) => f.units).find((u) => u.id === placed?.unitId)
+					?.name ?? '单位';
 			if (!$gameClock.isPaused) {
 				// 推演运行中：pending 预设流程
 				startPendingRoute(targetId, unitName, 'append');
@@ -119,8 +145,9 @@
 		const targetId = contextUnitId || $selectedPlacedUnitId;
 		if (targetId) {
 			const placed = $currentBattle?.placedUnits.find((p) => p.id === targetId);
-			const unitName = $currentBattle?.factions.flatMap((f) => f.units)
-				.find((u) => u.id === placed?.unitId)?.name ?? '单位';
+			const unitName =
+				$currentBattle?.factions.flatMap((f) => f.units).find((u) => u.id === placed?.unitId)
+					?.name ?? '单位';
 			clearRoute(targetId);
 			addLog(`清除路线: ${unitName}`);
 		}
@@ -183,87 +210,88 @@
 					定位单位
 				</ContextMenu.Item>
 
-				<ContextMenu.Sub>
-					<ContextMenu.SubTrigger
-						class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-medium select-none focus-visible:outline-none data-highlighted:bg-muted data-[state=open]:bg-muted"
-					>
-						<Route class="mr-2 size-4" />
-						路线指令
-						<ChevronRight class="ml-auto size-4 opacity-50" />
-					</ContextMenu.SubTrigger>
-					<ContextMenu.SubContent
-						class="z-[10000] w-[200px] rounded-xl border border-muted bg-background px-1 py-1.5 shadow-popover outline-none"
-						sideOffset={10}
-					>
-						<ContextMenu.Item
-							class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal select-none focus-visible:outline-none data-highlighted:bg-muted"
-							onSelect={handleResetRoute}
+				<div hidden={isDestroyed}>
+					<!-- 路线指令 -->
+					<ContextMenu.Sub>
+						<ContextMenu.SubTrigger
+							class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-medium select-none focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40 data-highlighted:bg-muted data-[state=open]:bg-muted"
 						>
-							<RefreshCw class="mr-2 size-4" />
-							重新设置路线
-							<span class="ml-auto text-xs opacity-50">清空并重绘</span>
-						</ContextMenu.Item>
-						<ContextMenu.Item
-							class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal select-none focus-visible:outline-none data-highlighted:bg-muted"
-							onSelect={handleAppendRoute}
+							<Route class="mr-2 size-4" />
+							路线指令
+							<ChevronRight class="ml-auto size-4 opacity-50" />
+						</ContextMenu.SubTrigger>
+						<ContextMenu.SubContent
+							class="z-[10000] w-[200px] rounded-xl border border-muted bg-background px-1 py-1.5 shadow-popover outline-none"
+							sideOffset={10}
 						>
-							<PlusCircle class="mr-2 size-4" />
-							绘制路线节点
-							<span class="ml-auto text-xs opacity-50">继续追加</span>
-						</ContextMenu.Item>					<ContextMenu.Item
-						class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal text-destructive select-none focus-visible:outline-none data-highlighted:bg-muted"
-						onSelect={handleClearRoute}
-					>
-						<Eraser class="mr-2 size-4" />
-						清除路线
-					</ContextMenu.Item>					</ContextMenu.SubContent>
-				</ContextMenu.Sub>
-
-				<ContextMenu.Item
-					class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal select-none focus-visible:outline-none data-highlighted:bg-muted"
-					onSelect={handleSetStrikeRange}
-				>
-					<Target class="mr-2 size-4" />
-					设置打击目标
-				</ContextMenu.Item>
-
-				<!-- 设置状态子菜单 -->
-				<ContextMenu.Sub>
-					<ContextMenu.SubTrigger
-						class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-medium select-none focus-visible:outline-none data-highlighted:bg-muted data-[state=open]:bg-muted"
-					>
-						<Activity class="mr-2 size-4" />
-						设置状态
-					</ContextMenu.SubTrigger>
-					<ContextMenu.SubContent
-						class="z-100 w-[160px] rounded-xl border border-muted bg-background px-1 py-1.5 ring-0! shadow-popover ring-transparent!"
-						sideOffset={10}
-					>
-						{#each STATUS_LIST as status}
 							<ContextMenu.Item
 								class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal select-none focus-visible:outline-none data-highlighted:bg-muted"
-								onSelect={() => handleSetStatus(status)}
+								onSelect={handleResetRoute}
 							>
-								<Check class="mr-2 size-4 {currentStatus === status ? 'opacity-100' : 'opacity-0'}" />
-								{UNIT_STATUS_LABELS[status]}
+								<RefreshCw class="mr-2 size-4" />
+								重新设置路线
+								<span class="ml-auto text-xs opacity-50">清空并重绘</span>
 							</ContextMenu.Item>
-						{/each}
-					</ContextMenu.SubContent>
-				</ContextMenu.Sub>
+							<ContextMenu.Item
+								class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal select-none focus-visible:outline-none data-highlighted:bg-muted"
+								onSelect={handleAppendRoute}
+							>
+								<PlusCircle class="mr-2 size-4" />
+								绘制路线节点
+								<span class="ml-auto text-xs opacity-50">继续追加</span>
+							</ContextMenu.Item>
+							<ContextMenu.Item
+								class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal text-destructive select-none focus-visible:outline-none data-highlighted:bg-muted"
+								onSelect={handleClearRoute}
+							>
+								<Eraser class="mr-2 size-4" />
+								清除路线
+							</ContextMenu.Item>
+						</ContextMenu.SubContent>
+					</ContextMenu.Sub>
+					<!-- 设置打击目标 -->
+					<ContextMenu.Item
+						class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal select-none focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40 data-highlighted:bg-muted"
+						onSelect={handleSetStrikeRange}
+					>
+						<Target class="mr-2 size-4" />
+						设置打击目标
+					</ContextMenu.Item>
 
+					<!-- 设置状态子菜单 -->
+					<ContextMenu.Sub>
+						<ContextMenu.SubTrigger
+							class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-medium select-none focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40 data-highlighted:bg-muted data-[state=open]:bg-muted"
+						>
+							<Activity class="mr-2 size-4" />
+							设置状态
+						</ContextMenu.SubTrigger>
+						<ContextMenu.SubContent
+							class="z-100 w-[160px] rounded-xl border border-muted bg-background px-1 py-1.5 ring-0! shadow-popover ring-transparent!"
+							sideOffset={10}
+						>
+							{#each STATUS_LIST as status}
+								<ContextMenu.Item
+									class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal select-none focus-visible:outline-none data-highlighted:bg-muted"
+									onSelect={() => handleSetStatus(status)}
+								>
+									<Check
+										class="mr-2 size-4 {currentStatus === status ? 'opacity-100' : 'opacity-0'}"
+									/>
+									{UNIT_STATUS_LABELS[status]}
+								</ContextMenu.Item>
+							{/each}
+						</ContextMenu.SubContent>
+					</ContextMenu.Sub>
+				</div>
+
+				<!-- 删除单位 -->
 				<ContextMenu.Item
 					class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal text-red-500 select-none focus-visible:outline-none data-highlighted:bg-muted"
 					onSelect={handleDeletePlaced}
 				>
 					<Trash2 class="mr-2 size-4" />
 					删除单位
-				</ContextMenu.Item>
-			{:else}
-				<ContextMenu.Item
-					class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal select-none opacity-50 focus-visible:outline-none"
-					disabled
-				>
-					右键单位查看更多操作
 				</ContextMenu.Item>
 			{/if}
 		</ContextMenu.Content>

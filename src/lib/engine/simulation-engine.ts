@@ -230,6 +230,14 @@ function handlePlacedCombat() {
 			next[attackerId] = { ...next[attackerId], isEngaged: engaged };
 		}
 
+		// 战斗结算后：将 HP 归零的单位状态强制设为阵亡，清除路线
+		for (const id of Object.keys(next)) {
+			const pos = next[id];
+			if (pos.hp <= 0 && pos.status !== 'destroyed') {
+				next[id] = { ...pos, status: 'destroyed', route: [], isEngaged: false };
+			}
+		}
+
 		return next;
 	});
 }

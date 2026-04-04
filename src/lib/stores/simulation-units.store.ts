@@ -131,11 +131,12 @@ export function resetUnits() {
 /**
  * 向指定单位下达新指令。
  * 新坐标写入 pendingPath，不影响正在执行的 targetPath。
+ * 阵亡单位（hp <= 0）拒绝接收指令。
  */
 export function issueSimCommand(unitId: string, path: Vec2[]) {
 	simulationUnits.update((units) =>
 		units.map((u) =>
-			u.id === unitId ? { ...u, pendingPath: path, isAwaitingConfirmation: true } : u
+			u.id === unitId && u.hp > 0 ? { ...u, pendingPath: path, isAwaitingConfirmation: true } : u
 		)
 	);
 }
