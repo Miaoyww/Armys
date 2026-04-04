@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ContextMenu } from 'bits-ui';
-	import { Eye, LocateFixed, Route, RefreshCw, PlusCircle, ChevronRight, Target, Activity, Trash2, Check } from '@lucide/svelte';
+	import { Eye, LocateFixed, Route, RefreshCw, PlusCircle, ChevronRight, Eraser, Target, Activity, Trash2, Check } from '@lucide/svelte';
 	import { UNIT_STATUS_LABELS } from '$lib/types';
 	import type { PlacedUnit } from '$lib/types';
 	import * as L from 'leaflet';
@@ -115,6 +115,19 @@
 		open = false;
 	}
 
+	function handleClearRoute() {
+		const targetId = contextUnitId || $selectedPlacedUnitId;
+		if (targetId) {
+			const placed = $currentBattle?.placedUnits.find((p) => p.id === targetId);
+			const unitName = $currentBattle?.factions.flatMap((f) => f.units)
+				.find((u) => u.id === placed?.unitId)?.name ?? '单位';
+			clearRoute(targetId);
+			addLog(`清除路线: ${unitName}`);
+		}
+		contextUnitId = null;
+		open = false;
+	}
+
 	function handleSetStrikeRange() {
 		const targetId = contextUnitId || $selectedPlacedUnitId;
 		if (targetId) {
@@ -197,8 +210,13 @@
 							<PlusCircle class="mr-2 size-4" />
 							绘制路线节点
 							<span class="ml-auto text-xs opacity-50">继续追加</span>
-						</ContextMenu.Item>
-					</ContextMenu.SubContent>
+						</ContextMenu.Item>					<ContextMenu.Item
+						class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal text-destructive select-none focus-visible:outline-none data-highlighted:bg-muted"
+						onSelect={handleClearRoute}
+					>
+						<Eraser class="mr-2 size-4" />
+						清除路线
+					</ContextMenu.Item>					</ContextMenu.SubContent>
 				</ContextMenu.Sub>
 
 				<ContextMenu.Item

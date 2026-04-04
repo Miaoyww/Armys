@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ContextMenu } from 'bits-ui';
-	import { UserPlus, Route, RefreshCw, PlusCircle, ChevronRight } from '@lucide/svelte';
+	import { UserPlus, Route, RefreshCw, PlusCircle, ChevronRight, Eraser } from '@lucide/svelte';
 	import {
 		currentBattle,
 		currentFactionId,
@@ -71,6 +71,18 @@
 		}
 		open = false;
 	}
+
+	function handleClearRoute() {
+		const unitId = $selectedPlacedUnitId;
+		if (unitId) {
+			const placed = $currentBattle?.placedUnits.find((p) => p.id === unitId);
+			const unitName = $currentBattle?.factions.flatMap((f) => f.units)
+				.find((u) => u.id === placed?.unitId)?.name ?? '单位';
+			clearRoute(unitId);
+			addLog(`清除路线: ${unitName}`);
+		}
+		open = false;
+	}
 </script>
 
 <ContextMenu.Root bind:open={getOpen, setOpen}>
@@ -107,8 +119,13 @@
 							<PlusCircle class="mr-2 size-4" />
 							绘制路线节点
 							<span class="ml-auto text-xs opacity-50">继续追加</span>
-						</ContextMenu.Item>
-					</ContextMenu.SubContent>
+						</ContextMenu.Item>					<ContextMenu.Item
+						class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal text-destructive select-none focus-visible:outline-none data-highlighted:bg-muted"
+						onSelect={handleClearRoute}
+					>
+						<Eraser class="mr-2 size-4" />
+						清除路线
+					</ContextMenu.Item>					</ContextMenu.SubContent>
 				</ContextMenu.Sub>
 			{/if}
 
