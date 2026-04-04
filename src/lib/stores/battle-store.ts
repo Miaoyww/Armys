@@ -1,5 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
-import type { Battle, EventSetting, Faction, MilitaryUnit, PlacedUnit, ActionLogEntry, UnitSide } from '$lib/types';
+import type { Battle, EventSetting, Faction, MilitaryUnit, PlacedUnit, ActionLogEntry, UnitSide, ArmyUnit } from '$lib/types';
+import { MISSILE_ATTACK_RANGE_KM } from '$lib/types';
 
 const STORAGE_KEY = 'wars_battles';
 
@@ -287,6 +288,23 @@ export function placeUnit(unitId: string, factionId: string, lat: number, lng: n
 	const unit = battle?.factions.find((f) => f.id === factionId)?.units.find((u) => u.id === unitId);
 	pushUndoSnapshot(`放置单位: ${unit?.name ?? ''}`);
 	const id = generateId();
+
+	// 根据单位组成派生攻击射程（km）
+	function deriveAttackRange(u: MilitaryUnit | undefined): number {
+		if (!u) return 15;
+		if (u.branch === 'army') {
+			let maxRange = 15;
+			for (const m of (u as ArmyUnit).missiles) {
+				const r = MISSILE_ATTACK_RANGE_KM[m.type];
+				if (r > maxRange) maxRange = r;
+			}
+			return maxRange;
+		}
+		if (u.branch === 'navy') return 80;
+		if (u.branch === 'air_force') return 150;
+		return 15;
+	}
+
 	const placed: PlacedUnit = {
 		id,
 		unitId,
@@ -305,11 +323,24 @@ export function placeUnit(unitId: string, factionId: string, lat: number, lng: n
 		airAttack: 5,
 		defense: 25,
 		speed: 8,
-		attackRange: 15
+		attackRange: deriveAttackRange(unit)
 	};
 	updateCurrentBattle((b) => ({
 		...b,
 		placedUnits: [...b.placedUnits, placed]
+	}));
+	// 同步写入 runtimePositions，使引擎立即感知到新单位（无需等待下次 initRuntimePositions）
+	runtimePositions.update((pos) => ({
+		...pos,
+		[id]: {
+			lat,
+			lng,
+			route: [],
+			status: 'idle',
+			hp: placed.hp,
+			org: placed.org,
+			isEngaged: false
+		}
 	}));
 	addLog(`在 (${lat.toFixed(3)}, ${lng.toFixed(3)}) 放置单位`);
 	return id;
@@ -326,6 +357,11 @@ export function removePlacedUnit(placedId: string) {
 		...b,
 		placedUnits: b.placedUnits.filter((u) => u.id !== placedId)
 	}));
+	runtimePositions.update((pos) => {
+		const next = { ...pos };
+		delete next[placedId];
+		return next;
+	});
 	addLog(`从地图撒除单位: ${unitName}`);
 	if (get(selectedPlacedUnitId) === placedId) {
 		selectedPlacedUnitId.set(null);
@@ -345,7 +381,13 @@ export function addRoutePoint(placedId: string, lat: number, lng: number) {
 	const battle = get(currentBattle);
 	const unit = battle?.placedUnits.find((u) => u.id === placedId);
 	if (!unit) return;
-	updatePlacedUnit(placedId, { route: [...unit.route, [lat, lng]] });
+	const newRoute: [number, number][] = [...unit.route, [lat, lng]];
+	updatePlacedUnit(placedId, { route: newRoute });
+	// 将新路线同步写入 runtimePositions，使引擎在推演运行期间也能接收到路线更新
+	runtimePositions.update((pos) => {
+		if (!pos[placedId]) return pos;
+		return { ...pos, [placedId]: { ...pos[placedId], route: newRoute } };
+	});
 }
 
 export function clearRoute(placedId: string) {
@@ -356,6 +398,11 @@ export function clearRoute(placedId: string) {
 		: '';
 	pushUndoSnapshot(`清除路线: ${unitName}`);
 	updatePlacedUnit(placedId, { route: [] });
+	// 将清除同步到 runtimePositions
+	runtimePositions.update((pos) => {
+		if (!pos[placedId]) return pos;
+		return { ...pos, [placedId]: { ...pos[placedId], route: [] } };
+	});
 	addLog(`清除路线: ${unitName}`);
 }
 
@@ -530,7 +577,7 @@ export function tickMapMovement(deltaSimSec: number) {
 			}
 
 			const status: PlacedUnit['status'] = route.length === 0 ? 'idle' : 'moving';
-			next[id] = { lat, lng, route, status };
+			next[id] = { ...cur, lat, lng, route, status };
 		}
 		return next;
 	});

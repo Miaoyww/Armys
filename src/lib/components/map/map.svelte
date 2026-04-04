@@ -57,6 +57,10 @@
 	const markersMap: Record<string, L.Marker> = {};
 	/** 各单位行动路线 polyline 引用（快速路径更新用） */
 	const routePolylinesMap: Record<string, L.Polyline> = {};
+	/** 各单位攻击射程圆圈引用（快速路径方址更新用） */
+	const attackRangeCirclesMap: Record<string, L.Circle> = {};
+	/** 上一次渲染图标时的 hp/org/status 缓存（避免每帧重建 DivIcon） */
+	const iconStateCache: Record<string, { hp: number; org: number; status: string }> = {};
 
 	// 构建单位 Popup 内容节点
 	function createPopupElement(unit: MilitaryUnit, faction: Faction, placed: PlacedUnit): HTMLElement {
@@ -85,6 +89,7 @@
 		rangesLayer.clearLayers();
 		for (const key in markersMap) delete markersMap[key];
 		for (const key in routePolylinesMap) delete routePolylinesMap[key];
+		for (const key in attackRangeCirclesMap) delete attackRangeCirclesMap[key];
 
 		const battle = $currentBattle;
 		if (!battle) return;
@@ -164,6 +169,22 @@
 				routesLayer.addLayer(endMarker);
 			}
 
+			// 攻击射程圆圈（仅选中时可见）
+			if (placed.attackRange > 0) {
+				const isSelected = placed.id === $selectedPlacedUnitId;
+				const attackCircle = L.circle([placed.lat, placed.lng], {
+					radius: placed.attackRange * 1000, // km → meters
+					color: faction.color,
+					weight: isSelected ? 1 : 0,
+					fillColor: faction.color,
+					fillOpacity: isSelected ? 0.04 : 0,
+					opacity: isSelected ? 1 : 0,
+					dashArray: '6 4'
+				});
+				rangesLayer.addLayer(attackCircle);
+				attackRangeCirclesMap[placed.id] = attackCircle;
+			}
+
 			// 打击范围
 			if (placed.strikeRadius > 0) {
 				const center = placed.strikeTarget
@@ -216,6 +237,33 @@
 			const marker = markersMap[id];
 			if (marker) {
 				marker.setLatLng([pos.lat, pos.lng]);
+
+				// 同步更新攻击射程圆圈位置
+				const atkCircle = attackRangeCirclesMap[id];
+				if (atkCircle) atkCircle.setLatLng([pos.lat, pos.lng]);
+
+				// 更新图标（HP/Org 进度条 + status 变化时）
+				const hpR = Math.round(pos.hp);
+				const orgR = Math.round(pos.org);
+				const cached = iconStateCache[id];
+				if (!cached || cached.hp !== hpR || cached.org !== orgR || cached.status !== pos.status) {
+					iconStateCache[id] = { hp: hpR, org: orgR, status: pos.status };
+					const battle = get(currentBattle);
+					const placed = battle?.placedUnits.find((p) => p.id === id);
+					if (placed) {
+						const info = findUnit(placed.unitId);
+						if (info) {
+							marker.setIcon(
+								getNatoIcon(
+									info.unit,
+									info.faction,
+									{ ...placed, hp: pos.hp, org: pos.org, status: pos.status },
+									placed.id === $selectedPlacedUnitId
+								)
+							);
+						}
+					}
+				}
 			}
 
 			// 更新路线 polyline（或在到达终点时移除）

@@ -13,6 +13,7 @@
 		MapPin
 	} from '@lucide/svelte';
 	import NatoSymbol from './nato-symbol.svelte';
+	import { runtimePositions } from '$lib/stores/battle-store';
 
 	let { unit, faction, placed }: { unit: MilitaryUnit; faction: Faction; placed: PlacedUnit } =
 		$props();
@@ -33,8 +34,13 @@
 	const natoType = $derived<NatoUnitType>(placed.natoType ?? deriveNatoType(unit));
 	const side = $derived<UnitSide>(faction.side ?? 'blue');
 
-	const hpPct = $derived(placed.maxHp > 0 ? (placed.hp / placed.maxHp) * 100 : 100);
-	const orgPct = $derived(placed.maxOrg > 0 ? (placed.org / placed.maxOrg) * 100 : 100);
+	const liveRt = $derived($runtimePositions[placed.id]);
+	const liveHp = $derived(liveRt?.hp ?? placed.hp);
+	const liveOrg = $derived(liveRt?.org ?? placed.org);
+	const liveStatus = $derived((liveRt?.status ?? placed.status) as PlacedUnit['status']);
+
+	const hpPct = $derived(placed.maxHp > 0 ? (liveHp / placed.maxHp) * 100 : 100);
+	const orgPct = $derived(placed.maxOrg > 0 ? (liveOrg / placed.maxOrg) * 100 : 100);
 	const hpColor = $derived(hpPct > 50 ? '#22c55e' : hpPct > 25 ? '#f59e0b' : '#ef4444');
 </script>
 
@@ -69,7 +75,7 @@
 			<div class="flex flex-1 flex-col gap-0.5">
 				<div class="flex items-center justify-between">
 					<span class="text-[10px] font-medium text-stone-500">生命值</span>
-					<span class="font-mono text-[10px] text-stone-600">{placed.hp}/{placed.maxHp}</span>
+					<span class="font-mono text-[10px] text-stone-600">{Math.round(liveHp)}/{placed.maxHp}</span>
 				</div>
 				<div class="h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
 					<div
@@ -85,7 +91,7 @@
 			<div class="flex flex-1 flex-col gap-0.5">
 				<div class="flex items-center justify-between">
 					<span class="text-[10px] font-medium text-stone-500">组织度</span>
-					<span class="font-mono text-[10px] text-stone-600">{placed.org}/{placed.maxOrg}</span>
+					<span class="font-mono text-[10px] text-stone-600">{Math.round(liveOrg)}/{placed.maxOrg}</span>
 				</div>
 				<div class="h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
 					<div
@@ -144,7 +150,7 @@
 	<div class="flex flex-col gap-1">
 		<div class="flex items-center justify-between gap-4">
 			<span class="text-xs text-stone-400">状态</span>
-			<span class="text-xs font-medium text-stone-600">{UNIT_STATUS_LABELS[placed.status]}</span>
+			<span class="text-xs font-medium text-stone-600">{UNIT_STATUS_LABELS[liveStatus]}</span>
 		</div>
 		<div class="flex items-center justify-between gap-4">
 			<MapPin class="h-3 w-3 text-stone-300" />

@@ -3,6 +3,13 @@
 /** 军种 */
 export type Branch = 'army' | 'navy' | 'air_force';
 
+/** 陆军单位大类 */
+export type ArmyUnitCategory = 'infantry' | 'armor' | 'missile';
+/** 海军单位大类 */
+export type NavyUnitCategory = 'surface' | 'submarine' | 'support';
+/** 空军单位大类 */
+export type AirForceUnitCategory = 'fighter' | 'bomber' | 'support';
+
 /** 阵营立场 */
 export type UnitSide = 'blue' | 'red' | 'neutral';
 
@@ -113,6 +120,7 @@ export interface ArmyUnit {
 	id: string;
 	name: string;
 	branch: 'army';
+	category: ArmyUnitCategory;
 	infantry: InfantryComponent[];
 	armor: ArmorComponent[];
 	missiles: MissileComponent[];
@@ -122,6 +130,7 @@ export interface NavyUnit {
 	id: string;
 	name: string;
 	branch: 'navy';
+	category: NavyUnitCategory;
 	surface: SurfaceShipComponent[];
 	submarines: SubmarineComponent[];
 	support: NavalSupportComponent[];
@@ -131,6 +140,7 @@ export interface AirForceUnit {
 	id: string;
 	name: string;
 	branch: 'air_force';
+	category: AirForceUnitCategory;
 	fighters: FighterComponent[];
 	bombers: BomberComponent[];
 	support: AirSupportComponent[];
@@ -364,6 +374,24 @@ export const AIR_SUPPORT_QUALITY_LABELS: Record<AirSupportQuality, string> = {
 	specialized: '专用型'
 };
 
+export const ARMY_CATEGORY_LABELS: Record<ArmyUnitCategory, string> = {
+	infantry: '步兵',
+	armor: '装甲',
+	missile: '导弹'
+};
+
+export const NAVY_CATEGORY_LABELS: Record<NavyUnitCategory, string> = {
+	surface: '水面舰艇',
+	submarine: '潜艇',
+	support: '支援舰艇'
+};
+
+export const AIR_FORCE_CATEGORY_LABELS: Record<AirForceUnitCategory, string> = {
+	fighter: '战斗机',
+	bomber: '轰炸机',
+	support: '支援飞机'
+};
+
 export const UNIT_STATUS_LABELS: Record<PlacedUnit['status'], string> = {
 	idle: '待命',
 	moving: '行军',
@@ -371,6 +399,17 @@ export const UNIT_STATUS_LABELS: Record<PlacedUnit['status'], string> = {
 	defending: '防御',
 	retreating: '撤退',
 	destroyed: '阵亡'
+};
+
+/**
+ * 每种导弹类型的最大攻击射程（km）。
+ * 用于推演引擎战斗结算及地图显示攻击半径。
+ */
+export const MISSILE_ATTACK_RANGE_KM: Record<ArmyMissileType, number> = {
+	anti_tank:   5,    // 反坦克导弹（ATGMs）
+	surface_air: 50,   // 地空导弹（SAM）
+	cruise:      300,  // 巡航导弹
+	ballistic:   1000  // 弹道导弹
 };
 
 export const UNIT_SIDE_LABELS: Record<UnitSide, string> = {

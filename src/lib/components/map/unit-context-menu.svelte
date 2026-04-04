@@ -64,6 +64,22 @@
 		})()
 	);
 
+	/** 只有能远程打击的单位（陆军导弹分队、海军、空军轰炸机）才有"设置打击目标"菜单项 */
+	let canSetStrikeTarget = $derived(
+		(() => {
+			const id = contextUnitId || $selectedPlacedUnitId;
+			if (!id || isDestroyed) return false;
+			const placed = $currentBattle?.placedUnits.find((p) => p.id === id);
+			if (!placed) return false;
+			const unit = $currentBattle?.factions.flatMap((f) => f.units).find((u) => u.id === placed.unitId);
+			if (!unit) return false;
+			if (unit.branch === 'army') return unit.missiles.length > 0;
+			if (unit.branch === 'navy') return true; // 海军舰艇/潜艇均可打击
+			if (unit.branch === 'air_force') return unit.bombers.length > 0;
+			return false;
+		})()
+	);
+
 	function getOpen() {
 		return open;
 	}
@@ -249,7 +265,8 @@
 							</ContextMenu.Item>
 						</ContextMenu.SubContent>
 					</ContextMenu.Sub>
-					<!-- 设置打击目标 -->
+					<!-- 设置打击目标（仅导弹/海军/轰炸机单位） -->
+					{#if canSetStrikeTarget}
 					<ContextMenu.Item
 						class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-normal select-none focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40 data-highlighted:bg-muted"
 						onSelect={handleSetStrikeRange}
@@ -257,6 +274,7 @@
 						<Target class="mr-2 size-4" />
 						设置打击目标
 					</ContextMenu.Item>
+					{/if}
 
 					<!-- 设置状态子菜单 -->
 					<ContextMenu.Sub>

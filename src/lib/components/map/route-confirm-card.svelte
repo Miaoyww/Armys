@@ -46,8 +46,11 @@
 				<Button
 					size="sm"
 					onclick={() => {
+						const unitName = pr.unitName;
+						const type = pr.type;
+						const count = pr.points.length;
 						applyPendingRoute();
-						addLog(`路线更新: ${pr.unitName}，${pr.type === 'reset' ? '重置' : '追加'} ${pr.points.length} 个节点`);
+						addLog(`路线更新: ${unitName}，${type === 'reset' ? '重置' : '追加'} ${count} 个节点`);
 						open = false;
 					}}
 				>
