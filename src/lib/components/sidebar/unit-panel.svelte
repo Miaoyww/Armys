@@ -56,8 +56,36 @@
 		AIR_SUPPORT_TYPE_LABELS,
 		AIR_SUPPORT_QUALITY_LABELS
 	} from '$lib/types';
-	import { Trash2, MapPin, ChevronDown, ChevronRight, Plus } from '@lucide/svelte';
-
+	import {
+		Trash2,
+		MapPin,
+		ChevronDown,
+		ChevronRight,
+		Plus,
+		X,
+		Swords,
+		Users,
+		Shield,
+		Rocket,
+		Ship,
+		Waves,
+		Anchor,
+		Plane,
+		Bomb,
+		Radio
+	} from '@lucide/svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import { Separator } from '$lib/components/ui/separator';
+	import UnitCompRow from '$lib/components/cards/units/unit-comp-row.svelte';
+	import {
+		Card,
+		CardContent,
+		CardHeader,
+		CardTitle,
+		CardDescription
+	} from '$lib/components/ui/card';
 	const branches: Branch[] = ['army', 'navy', 'air_force'];
 
 	// 编辑状态
@@ -145,7 +173,18 @@
 		if (!$currentFactionId || !editingUnitId) return;
 		updateUnit($currentFactionId, editingUnitId, (u) => {
 			if (u.branch !== 'army') return u;
-			return { ...u, infantry: [...u.infantry, { id: genId(), type: armyInfantryType, quality: armyInfantryQuality, count: armyInfantryCount }] };
+			return {
+				...u,
+				infantry: [
+					...u.infantry,
+					{
+						id: genId(),
+						type: armyInfantryType,
+						quality: armyInfantryQuality,
+						count: armyInfantryCount
+					}
+				]
+			};
 		});
 	}
 
@@ -153,7 +192,13 @@
 		if (!$currentFactionId || !editingUnitId) return;
 		updateUnit($currentFactionId, editingUnitId, (u) => {
 			if (u.branch !== 'army') return u;
-			return { ...u, armor: [...u.armor, { id: genId(), type: armyArmorType, quality: armyArmorQuality, count: armyArmorCount }] };
+			return {
+				...u,
+				armor: [
+					...u.armor,
+					{ id: genId(), type: armyArmorType, quality: armyArmorQuality, count: armyArmorCount }
+				]
+			};
 		});
 	}
 
@@ -161,7 +206,18 @@
 		if (!$currentFactionId || !editingUnitId) return;
 		updateUnit($currentFactionId, editingUnitId, (u) => {
 			if (u.branch !== 'army') return u;
-			return { ...u, missiles: [...u.missiles, { id: genId(), type: armyMissileType, quality: armyMissileQuality, count: armyMissileCount }] };
+			return {
+				...u,
+				missiles: [
+					...u.missiles,
+					{
+						id: genId(),
+						type: armyMissileType,
+						quality: armyMissileQuality,
+						count: armyMissileCount
+					}
+				]
+			};
 		});
 	}
 
@@ -169,7 +225,18 @@
 		if (!$currentFactionId || !editingUnitId) return;
 		updateUnit($currentFactionId, editingUnitId, (u) => {
 			if (u.branch !== 'navy') return u;
-			return { ...u, surface: [...u.surface, { id: genId(), type: navySurfaceType, quality: navySurfaceQuality, count: navySurfaceCount }] };
+			return {
+				...u,
+				surface: [
+					...u.surface,
+					{
+						id: genId(),
+						type: navySurfaceType,
+						quality: navySurfaceQuality,
+						count: navySurfaceCount
+					}
+				]
+			};
 		});
 	}
 
@@ -177,7 +244,13 @@
 		if (!$currentFactionId || !editingUnitId) return;
 		updateUnit($currentFactionId, editingUnitId, (u) => {
 			if (u.branch !== 'navy') return u;
-			return { ...u, submarines: [...u.submarines, { id: genId(), type: navySubType, quality: navySubQuality, count: navySubCount }] };
+			return {
+				...u,
+				submarines: [
+					...u.submarines,
+					{ id: genId(), type: navySubType, quality: navySubQuality, count: navySubCount }
+				]
+			};
 		});
 	}
 
@@ -185,7 +258,18 @@
 		if (!$currentFactionId || !editingUnitId) return;
 		updateUnit($currentFactionId, editingUnitId, (u) => {
 			if (u.branch !== 'navy') return u;
-			return { ...u, support: [...u.support, { id: genId(), type: navySupportType, quality: navySupportQuality, count: navySupportCount }] };
+			return {
+				...u,
+				support: [
+					...u.support,
+					{
+						id: genId(),
+						type: navySupportType,
+						quality: navySupportQuality,
+						count: navySupportCount
+					}
+				]
+			};
 		});
 	}
 
@@ -193,7 +277,13 @@
 		if (!$currentFactionId || !editingUnitId) return;
 		updateUnit($currentFactionId, editingUnitId, (u) => {
 			if (u.branch !== 'air_force') return u;
-			return { ...u, fighters: [...u.fighters, { id: genId(), type: airFighterType, quality: airFighterQuality, count: airFighterCount }] };
+			return {
+				...u,
+				fighters: [
+					...u.fighters,
+					{ id: genId(), type: airFighterType, quality: airFighterQuality, count: airFighterCount }
+				]
+			};
 		});
 	}
 
@@ -201,7 +291,13 @@
 		if (!$currentFactionId || !editingUnitId) return;
 		updateUnit($currentFactionId, editingUnitId, (u) => {
 			if (u.branch !== 'air_force') return u;
-			return { ...u, bombers: [...u.bombers, { id: genId(), type: airBomberType, quality: airBomberQuality, count: airBomberCount }] };
+			return {
+				...u,
+				bombers: [
+					...u.bombers,
+					{ id: genId(), type: airBomberType, quality: airBomberQuality, count: airBomberCount }
+				]
+			};
 		});
 	}
 
@@ -209,7 +305,13 @@
 		if (!$currentFactionId || !editingUnitId) return;
 		updateUnit($currentFactionId, editingUnitId, (u) => {
 			if (u.branch !== 'air_force') return u;
-			return { ...u, support: [...u.support, { id: genId(), type: airSupportType, quality: airSupportQuality, count: airSupportCount }] };
+			return {
+				...u,
+				support: [
+					...u.support,
+					{ id: genId(), type: airSupportType, quality: airSupportQuality, count: airSupportCount }
+				]
+			};
 		});
 	}
 
@@ -218,11 +320,26 @@
 		updateUnit($currentFactionId, editingUnitId, (u) => {
 			switch (u.branch) {
 				case 'army':
-					return { ...u, infantry: u.infantry.filter((c) => c.id !== compId), armor: u.armor.filter((c) => c.id !== compId), missiles: u.missiles.filter((c) => c.id !== compId) };
+					return {
+						...u,
+						infantry: u.infantry.filter((c) => c.id !== compId),
+						armor: u.armor.filter((c) => c.id !== compId),
+						missiles: u.missiles.filter((c) => c.id !== compId)
+					};
 				case 'navy':
-					return { ...u, surface: u.surface.filter((c) => c.id !== compId), submarines: u.submarines.filter((c) => c.id !== compId), support: u.support.filter((c) => c.id !== compId) };
+					return {
+						...u,
+						surface: u.surface.filter((c) => c.id !== compId),
+						submarines: u.submarines.filter((c) => c.id !== compId),
+						support: u.support.filter((c) => c.id !== compId)
+					};
 				case 'air_force':
-					return { ...u, fighters: u.fighters.filter((c) => c.id !== compId), bombers: u.bombers.filter((c) => c.id !== compId), support: u.support.filter((c) => c.id !== compId) };
+					return {
+						...u,
+						fighters: u.fighters.filter((c) => c.id !== compId),
+						bombers: u.bombers.filter((c) => c.id !== compId),
+						support: u.support.filter((c) => c.id !== compId)
+					};
 			}
 		});
 	}
@@ -234,517 +351,448 @@
 	}
 </script>
 
-<div class="panel-section">
-	<div class="panel-title">
-		<span class="icon">⚔️</span>
-		<span>军事单位</span>
-	</div>
+<Card
+	class="absolute z-[1000] h-full w-[24rem] gap-0 border-border/70 bg-background/75 py-0 shadow-xl backdrop-blur-md"
+>
+	<CardHeader class="border-b px-5 py-4">
+		<CardTitle class="flex items-center gap-2 text-sm font-semibold tracking-wide">
+			<Swords class="size-4" />军事单位
+		</CardTitle>
+		<CardDescription class="text-xs text-muted-foreground">部署军事单位</CardDescription>
+	</CardHeader>
+	<CardContent class="sidebar-body overflow-y-auto px-4 py-4">
+		<div class="space-y-3">
+			<div class="space-y-2">
+				{#if !$currentFaction}
+					<p class="py-4 text-center text-xs text-muted-foreground">请先选择阵营</p>
+				{:else}
+					<!-- 军种选择 -->
+					<div class="flex gap-1 rounded-lg bg-muted p-1">
+						{#each branches as branch (branch)}
+							<button
+								class="flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors
+						{$currentBranch === branch
+									? 'bg-background text-foreground shadow-sm'
+									: 'text-muted-foreground hover:text-foreground'}"
+								onclick={() => {
+									currentBranch.set(branch);
+									editingUnitId = null;
+								}}
+							>
+								{BRANCH_LABELS[branch]}
+							</button>
+						{/each}
+					</div>
 
-	{#if !$currentFaction}
-		<p class="empty-hint">请先选择阵营</p>
-	{:else}
-		<!-- 军种选择 -->
-		<div class="branch-selector">
-			{#each branches as branch (branch)}
-				<button
-					class="branch-btn"
-					class:active={$currentBranch === branch}
-					onclick={() => { currentBranch.set(branch); editingUnitId = null; }}
-				>
-					{BRANCH_LABELS[branch]}
-				</button>
-			{/each}
-		</div>
+					<!-- 快速创建 -->
+					<div class="flex gap-2">
+						<Input
+							class="h-8 flex-1 text-sm"
+							placeholder="输入单位名称"
+							bind:value={newUnitName}
+							onkeydown={(e) => {
+								if (e.key === 'Enter') quickCreateUnit();
+							}}
+						/>
+						<Button size="sm" onclick={quickCreateUnit} disabled={!newUnitName.trim()}>
+							<Plus />创建
+						</Button>
+					</div>
 
-		<!-- 快速创建 -->
-		<div class="quick-create">
-			<input
-				type="text"
-				bind:value={newUnitName}
-				placeholder="输入单位名称"
-				onkeydown={(e) => { if (e.key === 'Enter') quickCreateUnit(); }}
-			/>
-			<button class="quick-create-btn" onclick={quickCreateUnit} disabled={!newUnitName.trim()}>
-				<Plus size={14} />
-				<span>创建</span>
-			</button>
-		</div>
-
-		<!-- 已有单位列表 -->
-		<div class="unit-list">
-			{#each $currentFaction.units.filter((u) => u.branch === $currentBranch) as unit (unit.id)}
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div class="unit-item" class:editing={editingUnitId === unit.id}>
-					<div
-						class="unit-header"
-						onclick={() => toggleEdit(unit.id)}
-						onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleEdit(unit.id); }}
-						role="button"
-						tabindex="0"
-					>
-						<div class="unit-info">
-							{#if editingUnitId === unit.id}
-								<ChevronDown size={14} />
-							{:else}
-								<ChevronRight size={14} />
+					<!-- 已有单位列表 -->
+					<ScrollArea class="h-36">
+						<div class="flex flex-col gap-0.5 pr-2">
+							{#each $currentFaction.units.filter((u) => u.branch === $currentBranch) as unit (unit.id)}
+								<!-- svelte-ignore a11y_no_static_element_interactions -->
+								<div
+									class="flex cursor-pointer items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors
+							{editingUnitId === unit.id ? 'bg-muted' : 'hover:bg-muted/60'}"
+									onclick={() => toggleEdit(unit.id)}
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') toggleEdit(unit.id);
+									}}
+									role="button"
+									tabindex="0"
+								>
+									<div class="flex min-w-0 flex-1 items-center gap-1.5">
+										{#if editingUnitId === unit.id}
+											<ChevronDown class="size-3.5 shrink-0 text-muted-foreground" />
+										{:else}
+											<ChevronRight class="size-3.5 shrink-0 text-muted-foreground" />
+										{/if}
+										<span class="truncate">{unit.name}</span>
+									</div>
+									<div class="flex shrink-0 gap-0.5">
+										<Button
+											variant="ghost"
+											size="icon-sm"
+											title="放置到地图"
+											class="size-6 text-muted-foreground hover:text-green-600"
+											onclick={(e) => {
+												e.stopPropagation();
+												handlePlaceUnit(unit.id);
+											}}
+										>
+											<MapPin class="size-3.5" />
+										</Button>
+										<Button
+											variant="ghost"
+											size="icon-sm"
+											title="删除"
+											class="size-6 text-muted-foreground hover:text-destructive"
+											onclick={(e) => {
+												e.stopPropagation();
+												removeUnit($currentFactionId!, unit.id);
+												if (editingUnitId === unit.id) editingUnitId = null;
+											}}
+										>
+											<Trash2 class="size-3.5" />
+										</Button>
+									</div>
+								</div>
+							{/each}
+							{#if $currentFaction.units.filter((u) => u.branch === $currentBranch).length === 0}
+								<p class="py-4 text-center text-xs text-muted-foreground">
+									暂无单位，输入名称快速创建
+								</p>
 							{/if}
-							<span class="unit-name">{unit.name}</span>
 						</div>
-						<div class="unit-actions">
-							<button class="unit-action-btn place" title="放置到地图"
-								onclick={(e) => { e.stopPropagation(); handlePlaceUnit(unit.id); }}>
-								<MapPin size={14} />
-							</button>
-							<button class="unit-action-btn delete" title="删除"
-								onclick={(e) => { e.stopPropagation(); removeUnit($currentFactionId!, unit.id); if (editingUnitId === unit.id) editingUnitId = null; }}>
-								<Trash2 size={14} />
-							</button>
-						</div>
-					</div>
-				</div>
-			{/each}
-			{#if $currentFaction.units.filter((u) => u.branch === $currentBranch).length === 0}
-				<p class="empty-hint">暂无单位，输入名称快速创建</p>
-			{/if}
-		</div>
+					</ScrollArea>
 
-		<!-- 编辑面板：选中单位后展开 -->
-		{#if editingUnit}
-			<div class="edit-panel">
-				<div class="edit-header">编辑: {editingUnit.name}</div>
+					<!-- 编辑面板：选中单位后展开 -->
+					{#if editingUnit}
+						<Separator />
 
-				{#if editingUnit.branch === 'army'}
-					{@const army = editingUnit as ArmyUnit}
+						<div>
+							<div class="flex flex-col gap-3">
+								<p class="text-xs font-semibold">编辑：{editingUnit.name}</p>
 
-					<div class="component-group">
-						<div class="component-title">🪖 步兵</div>
-						{#each army.infantry as comp (comp.id)}
-							<div class="component-item">
-								<span>{INFANTRY_TYPE_LABELS[comp.type]} · {INFANTRY_QUALITY_LABELS[comp.quality]} × {comp.count}</span>
-								<button class="remove-btn" onclick={() => removeComponent(comp.id)}>✕</button>
+								{#if editingUnit.branch === 'army'}
+									{@const army = editingUnit as ArmyUnit}
+
+									<!-- 步兵 -->
+									<div class="flex w-[20rem] flex-col gap-1.5">
+										<p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+											<Users class="size-3.5" />步兵
+										</p>
+										{#each army.infantry as comp (comp.id)}
+											<div
+												class="flex items-center justify-between rounded-md bg-muted/50 px-2 py-1 text-xs"
+											>
+												<span
+													>{INFANTRY_TYPE_LABELS[comp.type]} · {INFANTRY_QUALITY_LABELS[
+														comp.quality
+													]}
+													× {comp.count}</span
+												>
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													class="size-5 text-muted-foreground hover:text-destructive"
+													onclick={() => removeComponent(comp.id)}
+												>
+													<X class="size-3" />
+												</Button>
+											</div>
+										{/each}
+										<UnitCompRow
+											bind:typeValue={armyInfantryType}
+											typeItems={INFANTRY_TYPE_LABELS}
+											bind:qualityValue={armyInfantryQuality}
+											qualityItems={INFANTRY_QUALITY_LABELS}
+											bind:count={armyInfantryCount}
+											max={10000}
+											onAdd={addInfantryComp}
+										/>
+									</div>
+
+									<!-- 装甲 -->
+									<div class="flex w-[20rem] flex-col gap-1.5">
+										<p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+											<Shield class="size-3.5" />装甲
+										</p>
+										{#each army.armor as comp (comp.id)}
+											<div
+												class="flex items-center justify-between rounded-md bg-muted/50 px-2 py-1 text-xs"
+											>
+												<span
+													>{ARMOR_TYPE_LABELS[comp.type]} · {ARMOR_QUALITY_LABELS[comp.quality]} ×
+													{comp.count}</span
+												>
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													class="size-5 text-muted-foreground hover:text-destructive"
+													onclick={() => removeComponent(comp.id)}
+												>
+													<X class="size-3" />
+												</Button>
+											</div>
+										{/each}
+										<UnitCompRow
+											bind:typeValue={armyArmorType}
+											typeItems={ARMOR_TYPE_LABELS}
+											bind:qualityValue={armyArmorQuality}
+											qualityItems={ARMOR_QUALITY_LABELS}
+											bind:count={armyArmorCount}
+											max={1000}
+											onAdd={addArmorComp}
+										/>
+									</div>
+
+									<!-- 导弹 -->
+									<div class="flex w-[20rem] flex-col gap-1.5">
+										<p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+											<Rocket class="size-3.5" />导弹
+										</p>
+										{#each army.missiles as comp (comp.id)}
+											<div
+												class="flex items-center justify-between rounded-md bg-muted/50 px-2 py-1 text-xs"
+											>
+												<span
+													>{MISSILE_TYPE_LABELS[comp.type]} · {MISSILE_QUALITY_LABELS[comp.quality]}
+													×
+													{comp.count}</span
+												>
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													class="size-5 text-muted-foreground hover:text-destructive"
+													onclick={() => removeComponent(comp.id)}
+												>
+													<X class="size-3" />
+												</Button>
+											</div>
+										{/each}
+										<UnitCompRow
+											bind:typeValue={armyMissileType}
+											typeItems={MISSILE_TYPE_LABELS}
+											bind:qualityValue={armyMissileQuality}
+											qualityItems={MISSILE_QUALITY_LABELS}
+											bind:count={armyMissileCount}
+											max={500}
+											onAdd={addMissileComp}
+										/>
+									</div>
+								{:else if editingUnit.branch === 'navy'}
+									{@const navy = editingUnit as NavyUnit}
+
+									<!-- 水面舰艇 -->
+									<div class="flex flex-col gap-1.5">
+										<p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+											<Ship class="size-3.5" />水面舰艇
+										</p>
+										{#each navy.surface as comp (comp.id)}
+											<div
+												class="flex items-center justify-between rounded-md bg-muted/50 px-2 py-1 text-xs"
+											>
+												<span
+													>{SURFACE_TYPE_LABELS[comp.type]} · {NAVAL_QUALITY_LABELS[comp.quality]}
+													× {comp.count}</span
+												>
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													class="size-5 text-muted-foreground hover:text-destructive"
+													onclick={() => removeComponent(comp.id)}
+												>
+													<X class="size-3" />
+												</Button>
+											</div>
+										{/each}
+										<UnitCompRow
+											bind:typeValue={navySurfaceType}
+											typeItems={SURFACE_TYPE_LABELS}
+											bind:qualityValue={navySurfaceQuality}
+											qualityItems={NAVAL_QUALITY_LABELS}
+											bind:count={navySurfaceCount}
+											max={20}
+											onAdd={addSurfaceComp}
+										/>
+									</div>
+
+									<!-- 潜艇 -->
+									<div class="flex flex-col gap-1.5">
+										<p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+											<Waves class="size-3.5" />潜艇
+										</p>
+										{#each navy.submarines as comp (comp.id)}
+											<div
+												class="flex items-center justify-between rounded-md bg-muted/50 px-2 py-1 text-xs"
+											>
+												<span
+													>{SUBMARINE_TYPE_LABELS[comp.type]} · {SUBMARINE_QUALITY_LABELS[
+														comp.quality
+													]} × {comp.count}</span
+												>
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													class="size-5 text-muted-foreground hover:text-destructive"
+													onclick={() => removeComponent(comp.id)}
+												>
+													<X class="size-3" />
+												</Button>
+											</div>
+										{/each}
+										<UnitCompRow
+											bind:typeValue={navySubType}
+											typeItems={SUBMARINE_TYPE_LABELS}
+											bind:qualityValue={navySubQuality}
+											qualityItems={SUBMARINE_QUALITY_LABELS}
+											bind:count={navySubCount}
+											max={15}
+											onAdd={addSubComp}
+										/>
+									</div>
+
+									<!-- 支援舰艇 -->
+									<div class="flex flex-col gap-1.5">
+										<p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+											<Anchor class="size-3.5" />支援舰艇
+										</p>
+										{#each navy.support as comp (comp.id)}
+											<div
+												class="flex items-center justify-between rounded-md bg-muted/50 px-2 py-1 text-xs"
+											>
+												<span
+													>{NAVAL_SUPPORT_TYPE_LABELS[comp.type]} · {NAVAL_SUPPORT_QUALITY_LABELS[
+														comp.quality
+													]} × {comp.count}</span
+												>
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													class="size-5 text-muted-foreground hover:text-destructive"
+													onclick={() => removeComponent(comp.id)}
+												>
+													<X class="size-3" />
+												</Button>
+											</div>
+										{/each}
+										<UnitCompRow
+											bind:typeValue={navySupportType}
+											typeItems={NAVAL_SUPPORT_TYPE_LABELS}
+											bind:qualityValue={navySupportQuality}
+											qualityItems={NAVAL_SUPPORT_QUALITY_LABELS}
+											bind:count={navySupportCount}
+											max={10}
+											onAdd={addNavSupportComp}
+										/>
+									</div>
+								{:else if editingUnit.branch === 'air_force'}
+									{@const air = editingUnit as AirForceUnit}
+
+									<!-- 战斗机 -->
+									<div class="flex flex-col gap-1.5">
+										<p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+											<Plane class="size-3.5" />战斗机
+										</p>
+										{#each air.fighters as comp (comp.id)}
+											<div
+												class="flex items-center justify-between rounded-md bg-muted/50 px-2 py-1 text-xs"
+											>
+												<span
+													>{FIGHTER_TYPE_LABELS[comp.type]} · {FIGHTER_QUALITY_LABELS[comp.quality]}
+													×
+													{comp.count}</span
+												>
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													class="size-5 text-muted-foreground hover:text-destructive"
+													onclick={() => removeComponent(comp.id)}
+												>
+													<X class="size-3" />
+												</Button>
+											</div>
+										{/each}
+										<UnitCompRow
+											bind:typeValue={airFighterType}
+											typeItems={FIGHTER_TYPE_LABELS}
+											bind:qualityValue={airFighterQuality}
+											qualityItems={FIGHTER_QUALITY_LABELS}
+											bind:count={airFighterCount}
+											max={50}
+											onAdd={addFighterComp}
+										/>
+									</div>
+
+									<!-- 轰炸机 -->
+									<div class="flex flex-col gap-1.5">
+										<p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+											<Bomb class="size-3.5" />轰炸机
+										</p>
+										{#each air.bombers as comp (comp.id)}
+											<div
+												class="flex items-center justify-between rounded-md bg-muted/50 px-2 py-1 text-xs"
+											>
+												<span
+													>{BOMBER_TYPE_LABELS[comp.type]} · {BOMBER_QUALITY_LABELS[comp.quality]}
+													× {comp.count}</span
+												>
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													class="size-5 text-muted-foreground hover:text-destructive"
+													onclick={() => removeComponent(comp.id)}
+												>
+													<X class="size-3" />
+												</Button>
+											</div>
+										{/each}
+										<UnitCompRow
+											bind:typeValue={airBomberType}
+											typeItems={BOMBER_TYPE_LABELS}
+											bind:qualityValue={airBomberQuality}
+											qualityItems={BOMBER_QUALITY_LABELS}
+											bind:count={airBomberCount}
+											max={20}
+											onAdd={addBomberComp}
+										/>
+									</div>
+
+									<!-- 支援飞机 -->
+									<div class="flex flex-col gap-1.5">
+										<p class="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+											<Radio class="size-3.5" />支援飞机
+										</p>
+										{#each air.support as comp (comp.id)}
+											<div
+												class="flex items-center justify-between rounded-md bg-muted/50 px-2 py-1 text-xs"
+											>
+												<span
+													>{AIR_SUPPORT_TYPE_LABELS[comp.type]} · {AIR_SUPPORT_QUALITY_LABELS[
+														comp.quality
+													]}
+													× {comp.count}</span
+												>
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													class="size-5 text-muted-foreground hover:text-destructive"
+													onclick={() => removeComponent(comp.id)}
+												>
+													<X class="size-3" />
+												</Button>
+											</div>
+										{/each}
+										<UnitCompRow
+											bind:typeValue={airSupportType}
+											typeItems={AIR_SUPPORT_TYPE_LABELS}
+											bind:qualityValue={airSupportQuality}
+											qualityItems={AIR_SUPPORT_QUALITY_LABELS}
+											bind:count={airSupportCount}
+											max={15}
+											onAdd={addAirSupportComp}
+										/>
+									</div>
+								{/if}
 							</div>
-						{/each}
-						<div class="component-add">
-							<select bind:value={armyInfantryType}>
-								{#each Object.entries(INFANTRY_TYPE_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<select bind:value={armyInfantryQuality}>
-								{#each Object.entries(INFANTRY_QUALITY_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<input type="number" bind:value={armyInfantryCount} min="1" max="10000" />
-							<button class="comp-add-btn" onclick={addInfantryComp}>+</button>
 						</div>
-					</div>
-
-					<div class="component-group">
-						<div class="component-title">🛡️ 装甲</div>
-						{#each army.armor as comp (comp.id)}
-							<div class="component-item">
-								<span>{ARMOR_TYPE_LABELS[comp.type]} · {ARMOR_QUALITY_LABELS[comp.quality]} × {comp.count}</span>
-								<button class="remove-btn" onclick={() => removeComponent(comp.id)}>✕</button>
-							</div>
-						{/each}
-						<div class="component-add">
-							<select bind:value={armyArmorType}>
-								{#each Object.entries(ARMOR_TYPE_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<select bind:value={armyArmorQuality}>
-								{#each Object.entries(ARMOR_QUALITY_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<input type="number" bind:value={armyArmorCount} min="1" max="1000" />
-							<button class="comp-add-btn" onclick={addArmorComp}>+</button>
-						</div>
-					</div>
-
-					<div class="component-group">
-						<div class="component-title">🚀 导弹</div>
-						{#each army.missiles as comp (comp.id)}
-							<div class="component-item">
-								<span>{MISSILE_TYPE_LABELS[comp.type]} · {MISSILE_QUALITY_LABELS[comp.quality]} × {comp.count}</span>
-								<button class="remove-btn" onclick={() => removeComponent(comp.id)}>✕</button>
-							</div>
-						{/each}
-						<div class="component-add">
-							<select bind:value={armyMissileType}>
-								{#each Object.entries(MISSILE_TYPE_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<select bind:value={armyMissileQuality}>
-								{#each Object.entries(MISSILE_QUALITY_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<input type="number" bind:value={armyMissileCount} min="1" max="500" />
-							<button class="comp-add-btn" onclick={addMissileComp}>+</button>
-						</div>
-					</div>
-
-				{:else if editingUnit.branch === 'navy'}
-					{@const navy = editingUnit as NavyUnit}
-
-					<div class="component-group">
-						<div class="component-title">🚢 水面舰艇</div>
-						{#each navy.surface as comp (comp.id)}
-							<div class="component-item">
-								<span>{SURFACE_TYPE_LABELS[comp.type]} · {NAVAL_QUALITY_LABELS[comp.quality]} × {comp.count}</span>
-								<button class="remove-btn" onclick={() => removeComponent(comp.id)}>✕</button>
-							</div>
-						{/each}
-						<div class="component-add">
-							<select bind:value={navySurfaceType}>
-								{#each Object.entries(SURFACE_TYPE_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<select bind:value={navySurfaceQuality}>
-								{#each Object.entries(NAVAL_QUALITY_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<input type="number" bind:value={navySurfaceCount} min="1" max="20" />
-							<button class="comp-add-btn" onclick={addSurfaceComp}>+</button>
-						</div>
-					</div>
-
-					<div class="component-group">
-						<div class="component-title">🔱 潜艇</div>
-						{#each navy.submarines as comp (comp.id)}
-							<div class="component-item">
-								<span>{SUBMARINE_TYPE_LABELS[comp.type]} · {SUBMARINE_QUALITY_LABELS[comp.quality]} × {comp.count}</span>
-								<button class="remove-btn" onclick={() => removeComponent(comp.id)}>✕</button>
-							</div>
-						{/each}
-						<div class="component-add">
-							<select bind:value={navySubType}>
-								{#each Object.entries(SUBMARINE_TYPE_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<select bind:value={navySubQuality}>
-								{#each Object.entries(SUBMARINE_QUALITY_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<input type="number" bind:value={navySubCount} min="1" max="15" />
-							<button class="comp-add-btn" onclick={addSubComp}>+</button>
-						</div>
-					</div>
-
-					<div class="component-group">
-						<div class="component-title">⚓ 支援舰艇</div>
-						{#each navy.support as comp (comp.id)}
-							<div class="component-item">
-								<span>{NAVAL_SUPPORT_TYPE_LABELS[comp.type]} · {NAVAL_SUPPORT_QUALITY_LABELS[comp.quality]} × {comp.count}</span>
-								<button class="remove-btn" onclick={() => removeComponent(comp.id)}>✕</button>
-							</div>
-						{/each}
-						<div class="component-add">
-							<select bind:value={navySupportType}>
-								{#each Object.entries(NAVAL_SUPPORT_TYPE_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<select bind:value={navySupportQuality}>
-								{#each Object.entries(NAVAL_SUPPORT_QUALITY_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<input type="number" bind:value={navySupportCount} min="1" max="10" />
-							<button class="comp-add-btn" onclick={addNavSupportComp}>+</button>
-						</div>
-					</div>
-
-				{:else if editingUnit.branch === 'air_force'}
-					{@const air = editingUnit as AirForceUnit}
-
-					<div class="component-group">
-						<div class="component-title">✈️ 战斗机</div>
-						{#each air.fighters as comp (comp.id)}
-							<div class="component-item">
-								<span>{FIGHTER_TYPE_LABELS[comp.type]} · {FIGHTER_QUALITY_LABELS[comp.quality]} × {comp.count}</span>
-								<button class="remove-btn" onclick={() => removeComponent(comp.id)}>✕</button>
-							</div>
-						{/each}
-						<div class="component-add">
-							<select bind:value={airFighterType}>
-								{#each Object.entries(FIGHTER_TYPE_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<select bind:value={airFighterQuality}>
-								{#each Object.entries(FIGHTER_QUALITY_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<input type="number" bind:value={airFighterCount} min="1" max="50" />
-							<button class="comp-add-btn" onclick={addFighterComp}>+</button>
-						</div>
-					</div>
-
-					<div class="component-group">
-						<div class="component-title">💣 轰炸机</div>
-						{#each air.bombers as comp (comp.id)}
-							<div class="component-item">
-								<span>{BOMBER_TYPE_LABELS[comp.type]} · {BOMBER_QUALITY_LABELS[comp.quality]} × {comp.count}</span>
-								<button class="remove-btn" onclick={() => removeComponent(comp.id)}>✕</button>
-							</div>
-						{/each}
-						<div class="component-add">
-							<select bind:value={airBomberType}>
-								{#each Object.entries(BOMBER_TYPE_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<select bind:value={airBomberQuality}>
-								{#each Object.entries(BOMBER_QUALITY_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<input type="number" bind:value={airBomberCount} min="1" max="20" />
-							<button class="comp-add-btn" onclick={addBomberComp}>+</button>
-						</div>
-					</div>
-
-					<div class="component-group">
-						<div class="component-title">📡 支援飞机</div>
-						{#each air.support as comp (comp.id)}
-							<div class="component-item">
-								<span>{AIR_SUPPORT_TYPE_LABELS[comp.type]} · {AIR_SUPPORT_QUALITY_LABELS[comp.quality]} × {comp.count}</span>
-								<button class="remove-btn" onclick={() => removeComponent(comp.id)}>✕</button>
-							</div>
-						{/each}
-						<div class="component-add">
-							<select bind:value={airSupportType}>
-								{#each Object.entries(AIR_SUPPORT_TYPE_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<select bind:value={airSupportQuality}>
-								{#each Object.entries(AIR_SUPPORT_QUALITY_LABELS) as [v, l]}<option value={v}>{l}</option>{/each}
-							</select>
-							<input type="number" bind:value={airSupportCount} min="1" max="15" />
-							<button class="comp-add-btn" onclick={addAirSupportComp}>+</button>
-						</div>
-					</div>
+					{/if}
 				{/if}
 			</div>
-		{/if}
-	{/if}
-</div>
-
-<style>
-	.panel-section {
-		padding: 10px;
-	}
-
-	.panel-title {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-weight: 600;
-		font-size: 1rem;
-		margin-bottom: 12px;
-		padding-bottom: 8px;
-	}
-
-	.panel-title .icon {
-		width: 20px;
-		text-align: center;
-	}
-
-	.branch-selector {
-		display: flex;
-		gap: 4px;
-		margin-bottom: 12px;
-	}
-
-	.branch-btn {
-		flex: 1;
-		padding: 6px 10px;
-		border-radius: 6px;
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		background: rgba(255, 255, 255, 0.08);
-		color: inherit;
-		cursor: pointer;
-		font-size: 0.85rem;
-		transition: all 0.2s;
-	}
-
-	.branch-btn:hover {
-		background: rgba(255, 255, 255, 0.15);
-	}
-
-	.branch-btn.active {
-		background: var(--accent-color, #3182ce);
-		color: white;
-		border-color: transparent;
-	}
-
-	.unit-list {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		margin-bottom: 12px;
-		max-height: 150px;
-		overflow-y: auto;
-	}
-
-	.unit-item {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 6px 10px;
-		border-radius: 6px;
-		background: rgba(255, 255, 255, 0.08);
-		font-size: 0.85rem;
-	}
-
-	.unit-actions {
-		display: flex;
-		gap: 4px;
-	}
-
-	.unit-action-btn {
-		background: none;
-		border: none;
-		cursor: pointer;
-		padding: 2px;
-		opacity: 0.6;
-		color: inherit;
-		display: flex;
-		align-items: center;
-	}
-
-	.unit-action-btn:hover {
-		opacity: 1;
-	}
-
-	.unit-action-btn.place:hover {
-		color: var(--success-color, #38a169);
-	}
-
-	.unit-action-btn.delete:hover {
-		color: var(--danger-color, #e53e3e);
-	}
-
-	.custom-unit-panel {
-		margin-top: 12px;
-		padding-top: 12px;
-		border-top: 1px solid rgba(255, 255, 255, 0.1);
-	}
-
-	.form-group {
-		margin-bottom: 8px;
-	}
-
-	.form-group label {
-		display: block;
-		margin-bottom: 4px;
-		font-size: 0.8rem;
-		opacity: 0.7;
-	}
-
-	.form-group input[type='text'] {
-		width: 100%;
-		padding: 6px 10px;
-		border-radius: 6px;
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		background: rgba(255, 255, 255, 0.08);
-		color: inherit;
-		font-size: 0.85rem;
-	}
-
-	.component-group {
-		margin-bottom: 12px;
-		padding-bottom: 10px;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-	}
-
-	.component-title {
-		font-size: 0.9rem;
-		margin-bottom: 8px;
-		font-weight: 600;
-	}
-
-	.component-controls {
-		display: flex;
-		gap: 6px;
-		margin-bottom: 8px;
-	}
-
-	.component-controls select,
-	.component-controls input {
-		flex: 1;
-		padding: 5px 8px;
-		border-radius: 6px;
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		background: rgba(255, 255, 255, 0.08);
-		color: inherit;
-		font-size: 0.8rem;
-	}
-
-	.component-controls input[type='number'] {
-		max-width: 70px;
-	}
-
-	.add-component-btn {
-		width: 100%;
-		padding: 6px;
-		border-radius: 6px;
-		border: 1px solid rgba(56, 161, 105, 0.3);
-		background: rgba(56, 161, 105, 0.15);
-		color: inherit;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		font-size: 0.8rem;
-		margin-bottom: 6px;
-		transition: background 0.2s;
-	}
-
-	.add-component-btn:hover {
-		background: rgba(56, 161, 105, 0.3);
-	}
-
-	.component-list {
-		max-height: 120px;
-		overflow-y: auto;
-	}
-
-	.component-item {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 4px 8px;
-		margin-bottom: 3px;
-		border-radius: 4px;
-		background: rgba(255, 255, 255, 0.06);
-		font-size: 0.78rem;
-	}
-
-	.remove-btn {
-		background: none;
-		border: none;
-		cursor: pointer;
-		color: inherit;
-		opacity: 0.5;
-		font-size: 0.8rem;
-		padding: 0 4px;
-	}
-
-	.remove-btn:hover {
-		opacity: 1;
-		color: var(--danger-color, #e53e3e);
-	}
-
-	.create-unit-btn {
-		width: 100%;
-		padding: 10px;
-		margin-top: 12px;
-		border-radius: 6px;
-		border: 1px solid rgba(214, 158, 46, 0.3);
-		background: rgba(214, 158, 46, 0.2);
-		color: inherit;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		font-size: 0.9rem;
-		font-weight: 600;
-		transition: background 0.2s;
-	}
-
-	.create-unit-btn:hover:not(:disabled) {
-		background: rgba(214, 158, 46, 0.35);
-	}
-
-	.create-unit-btn:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
-	}
-
-	.empty-hint {
-		font-size: 0.8rem;
-		opacity: 0.5;
-		text-align: center;
-		padding: 10px;
-	}
-</style>
+		</div>
+	</CardContent>
+</Card>

@@ -169,7 +169,7 @@
 
 {#if unitPanelVisible}
 	<div
-		class="absolute top-24 bottom-24 z-[999] w-[22rem] overflow-hidden rounded-xl border border-border/70 bg-background/75 shadow-xl backdrop-blur-md"
+		class="absolute top-24 bottom-24 z-[999] w-[24rem] overflow-hidden rounded-xl border border-border/70 bg-background/75 shadow-xl backdrop-blur-md"
 		style="left: calc(20px + 22rem + 12px)"
 		in:fly={{ x: -20, duration: 240, easing: quintOut }}
 		out:fade={{ duration: 180 }}
@@ -179,19 +179,6 @@
 {/if}
 
 <style>
-	.sidebar-body {
-		display: flex;
-		flex-direction: column;
-		height: calc(100% - 1px);
-		overflow-y: auto;
-		scrollbar-width: none;
-		-ms-overflow-style: none;
-	}
-
-	.sidebar-body::-webkit-scrollbar {
-		display: none;
-	}
-
 	:global(.faction-scroll [data-slot='scroll-area-scrollbar']) {
 		display: none;
 	}
