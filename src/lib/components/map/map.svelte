@@ -4,7 +4,7 @@
 	import * as L from 'leaflet';
 	import { coords, zoom } from '$lib/stores/map-store';
 	import { ContextMenu, Portal } from 'bits-ui';
-	import { CirclePlus, Trash2, Route, Target, Eye, ArrowRightLeft, MapPin, Navigation, X } from '@lucide/svelte';
+	import { CirclePlus, Trash2, Route, Target, Eye, ArrowRightLeft, MapPin, Navigation, X, Activity } from '@lucide/svelte';
 	import * as Kbd from '$lib/components/ui/kbd/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import UnitPopup from './unit-popup.svelte';
@@ -30,11 +30,7 @@
 
 	let map: L.Map;
 	let myOpen = $state(false);
-	let contextLatLng: L.LatLng | null = $state(null);
 	let contextPlacedUnitId: string | null = $state(null);
-
-	let menuX = $state(0);
-	let menuY = $state(0);
 
 	let virtualAnchor: any = null;
 
@@ -137,6 +133,18 @@
 			marker.on('contextmenu', (e) => {
 				L.DomEvent.stopPropagation(e);
 				contextPlacedUnitId = placed.id;
+				virtualAnchor = {
+					getBoundingClientRect: () => ({
+						width: 0,
+						height: 0,
+						top: e.originalEvent.clientY,
+						bottom: e.originalEvent.clientY,
+						left: e.originalEvent.clientX,
+						right: e.originalEvent.clientX
+					}),
+					contextElement: document.body
+				};
+				setOpen(true);
 			});
 
 			markersLayer.addLayer(marker);
@@ -251,25 +259,9 @@
 			}
 		});
 
-		readyMap.on('contextmenu', async (e) => {
-			contextLatLng = e.latlng;
-			virtualAnchor = {
-				getBoundingClientRect: () => ({
-					width: 0,
-					height: 0,
-					top: e.originalEvent.clientY,
-					bottom: e.originalEvent.clientY,
-					left: e.originalEvent.clientX,
-					right: e.originalEvent.clientX
-				}),
-				contextElement: document.body
-			};
-
-			const rect = (readyMap.getContainer() as HTMLDivElement).getBoundingClientRect();
-			menuX = e.originalEvent.clientX - rect.left;
-			menuY = e.originalEvent.clientY - rect.top;
-
-			setOpen(true);
+		readyMap.on('contextmenu', (e) => {
+			// 阻止浏览器默认右键菜单，但不打开自定义菜单（仅单位右键触发）
+			e.originalEvent.preventDefault();
 		});
 
 		renderMapElements();
@@ -392,6 +384,7 @@
 					<ContextMenu.SubTrigger
 						class="rounded-button flex h-9 items-center py-3 pr-1.5 pl-3 text-sm font-medium select-none focus-visible:outline-none data-highlighted:bg-muted data-[state=open]:bg-muted"
 					>
+						<Activity class="mr-2 size-4" />
 						设置状态
 					</ContextMenu.SubTrigger>
 					<ContextMenu.SubContent
