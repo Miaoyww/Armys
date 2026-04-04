@@ -57,6 +57,19 @@
 		newFactionName = '';
 		newFactionColor = randomColor();
 	}
+
+
+	$effect(() => {
+		void $currentBattle?.actionLog.length;
+		logBottom?.scrollIntoView({ block: 'end' });
+	});
+	let logBottom: HTMLElement | undefined = $state();
+
+	$effect(() => {
+		// 访问 actionLog 以建立响应依赖
+		void $currentBattle?.actionLog.length;
+		logBottom?.scrollIntoView({ block: 'end' });
+	});
 </script>
 
 {#if leftBarVisible}
@@ -172,6 +185,7 @@
 								{:else}
 									<p class="py-2 text-center text-muted-foreground">等待操作...</p>
 								{/if}
+								<div bind:this={logBottom}></div>
 							</div>
 						</ScrollArea>
 					</div>
