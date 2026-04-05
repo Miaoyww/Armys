@@ -41,44 +41,22 @@
 		UnitSide
 	} from '$lib/types';
 	import {
-		BRANCH_LABELS,
 		ARMY_CATEGORY_LABELS,
 		NAVY_CATEGORY_LABELS,
 		AIR_FORCE_CATEGORY_LABELS,
 		INFANTRY_TYPE_LABELS,
-		INFANTRY_QUALITY_LABELS,
 		ARMOR_TYPE_LABELS,
-		ARMOR_QUALITY_LABELS,
 		MISSILE_TYPE_LABELS,
-		MISSILE_QUALITY_LABELS,
 		SURFACE_TYPE_LABELS,
-		NAVAL_QUALITY_LABELS,
 		SUBMARINE_TYPE_LABELS,
-		SUBMARINE_QUALITY_LABELS,
 		NAVAL_SUPPORT_TYPE_LABELS,
-		NAVAL_SUPPORT_QUALITY_LABELS,
 		FIGHTER_TYPE_LABELS,
-		FIGHTER_QUALITY_LABELS,
 		BOMBER_TYPE_LABELS,
-		BOMBER_QUALITY_LABELS,
 		AIR_SUPPORT_TYPE_LABELS,
-		AIR_SUPPORT_QUALITY_LABELS
 	} from '$lib/types';
 	import {
-		Trash2,
-		MapPin,
 		X,
 		Swords,
-		Users,
-		Shield,
-		Rocket,
-		Ship,
-		Waves,
-		Anchor,
-		Plane,
-		Bomb,
-		Radio,
-		Crosshair,
 		Pencil,
 		Check
 	} from '@lucide/svelte';
@@ -86,8 +64,6 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
-	import { Separator } from '$lib/components/ui/separator';
-	import UnitCompRow from '$lib/components/cards/units/unit-comp-row.svelte';
 	import BranchSelector from '$lib/components/buttons/branch-selector.svelte';
 	import { mapFlyTo } from '$lib/stores/map-store';
 	import {

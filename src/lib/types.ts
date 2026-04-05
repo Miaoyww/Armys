@@ -323,12 +323,6 @@ export const INFANTRY_TYPE_LABELS: Record<ArmyInfantryType, string> = {
 	marine: '海军陆战队'
 };
 
-export const INFANTRY_QUALITY_LABELS: Record<InfantryQuality, string> = {
-	basic: '基础装备',
-	standard: '标准装备',
-	advanced: '先进装备',
-	elite: '精英装备'
-};
 
 export const ARMOR_TYPE_LABELS: Record<ArmyArmorType, string> = {
 	light_tank: '轻型坦克',
@@ -337,13 +331,6 @@ export const ARMOR_TYPE_LABELS: Record<ArmyArmorType, string> = {
 	ifv: '步兵战车'
 };
 
-export const ARMOR_QUALITY_LABELS: Record<ArmorQuality, string> = {
-	gen1: '一代',
-	gen2: '二代',
-	gen3: '三代',
-	gen4: '四代',
-	gen5: '五代'
-};
 
 export const MISSILE_TYPE_LABELS: Record<ArmyMissileType, string> = {
 	anti_tank: '反坦克导弹',
@@ -352,12 +339,6 @@ export const MISSILE_TYPE_LABELS: Record<ArmyMissileType, string> = {
 	ballistic: '弹道导弹'
 };
 
-export const MISSILE_QUALITY_LABELS: Record<MissileQuality, string> = {
-	basic: '基础型',
-	guided: '制导型',
-	precision: '精确制导',
-	advanced: '先进型'
-};
 
 export const SURFACE_TYPE_LABELS: Record<NavySurfaceType, string> = {
 	destroyer: '驱逐舰',
@@ -366,12 +347,6 @@ export const SURFACE_TYPE_LABELS: Record<NavySurfaceType, string> = {
 	carrier: '航空母舰'
 };
 
-export const NAVAL_QUALITY_LABELS: Record<NavalQuality, string> = {
-	basic: '基础型',
-	guided: '制导型',
-	advanced: '先进型',
-	cutting_edge: '尖端型'
-};
 
 export const SUBMARINE_TYPE_LABELS: Record<NavySubmarineType, string> = {
 	attack_sub: '攻击潜艇',
@@ -380,25 +355,12 @@ export const SUBMARINE_TYPE_LABELS: Record<NavySubmarineType, string> = {
 	ssbn: '弹道导弹潜艇'
 };
 
-export const SUBMARINE_QUALITY_LABELS: Record<SubmarineQuality, string> = {
-	basic: '基础型',
-	stealth: '隐身型',
-	advanced: '先进型',
-	nuclear: '核动力型'
-};
 
 export const NAVAL_SUPPORT_TYPE_LABELS: Record<NavySupportType, string> = {
 	amphibious: '两栖攻击舰',
 	logistics: '后勤支援舰',
 	mine: '扫雷舰',
 	patrol: '巡逻舰'
-};
-
-export const NAVAL_SUPPORT_QUALITY_LABELS: Record<NavalSupportQuality, string> = {
-	basic: '基础型',
-	standard: '标准型',
-	advanced: '先进型',
-	specialized: '专用型'
 };
 
 export const FIGHTER_TYPE_LABELS: Record<AirForceFighterType, string> = {
@@ -408,13 +370,6 @@ export const FIGHTER_TYPE_LABELS: Record<AirForceFighterType, string> = {
 	stealth: '隐身战斗机'
 };
 
-export const FIGHTER_QUALITY_LABELS: Record<FighterQuality, string> = {
-	gen4: '四代机',
-	gen4plus: '四代半',
-	gen5: '五代机',
-	gen6: '六代机'
-};
-
 export const BOMBER_TYPE_LABELS: Record<AirForceBomberType, string> = {
 	strategic: '战略轰炸机',
 	tactical: '战术轰炸机',
@@ -422,12 +377,6 @@ export const BOMBER_TYPE_LABELS: Record<AirForceBomberType, string> = {
 	fighter_bomber: '战斗轰炸机'
 };
 
-export const BOMBER_QUALITY_LABELS: Record<BomberQuality, string> = {
-	basic: '基础型',
-	advanced: '先进型',
-	stealth: '隐身型',
-	hypersonic: '高超音速型'
-};
 
 export const AIR_SUPPORT_TYPE_LABELS: Record<AirForceSupportType, string> = {
 	awacs: '预警机',
@@ -436,12 +385,6 @@ export const AIR_SUPPORT_TYPE_LABELS: Record<AirForceSupportType, string> = {
 	recon: '侦察机'
 };
 
-export const AIR_SUPPORT_QUALITY_LABELS: Record<AirSupportQuality, string> = {
-	basic: '基础型',
-	standard: '标准型',
-	advanced: '先进型',
-	specialized: '专用型'
-};
 
 export const ARMY_CATEGORY_LABELS: Record<ArmyUnitCategory, string> = {
 	infantry: '步兵',

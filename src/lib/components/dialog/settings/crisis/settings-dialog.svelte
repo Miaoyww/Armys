@@ -2,7 +2,7 @@
 	import { settingOpen } from '$lib/stores/setting-dialog-store';
 	import { Button } from '../../../ui/button';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
-	import About from '$lib/components/dialog/settings/crisis/pages/about.svelte';
+	import About from '$lib/components/settings/pages/about.svelte';
 	import Battle from '$lib/components/dialog/settings/crisis/pages/battle.svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { X } from '@lucide/svelte';

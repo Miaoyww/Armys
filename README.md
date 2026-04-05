@@ -1,38 +1,71 @@
-# sv
+<div align="center">
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+# VETO
 
-## Creating a project
+**否定权** · 模拟联合国会议系统
 
-If you're seeing this, you've probably already done this step. Congrats!
+[![SvelteKit](https://img.shields.io/badge/SvelteKit-5-FF3E00?style=flat-square&logo=svelte&logoColor=white)](https://svelte.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-000000?style=flat-square&logo=vercel&logoColor=white)](https://veto.miaoyww.top)
 
-```sh
-# create a new project in the current directory
-npx sv create
+[**在线演示**](https://veto.miaoyww.top) · [**插件库**](https://github.com/VetoExpress/veto-plugins) · [**问题反馈**](https://github.com/Miaoyww/Veto/issues)
 
-# create a new project in my-app
-npx sv create my-app
+</div>
+
+---
+
+## 概述
+
+VETO 是一款基于Svelte5的集现代军事推演、模拟联合国会议系统的综合平台，支持多军种作战单位的态势标绘、时间轴推演与 HOI4 风格战斗结算。无需安装，即开即用。
+
+- **危机模式** — 自定义战场，部署陆海空三军单位，实时推演作战进程
+- **会议模式** — 模拟联合国会议流程，支持多方代表发言、提案与表决
+- **地图集成** — Leaflet 驱动，支持多种底图切换
+
+---
+
+## 技术栈
+
+| 层次 | 技术 |
+|------|------|
+| 框架 | Svelte 5 + SvelteKit |
+| 语言 | TypeScript |
+| 样式 | Tailwind CSS v4 |
+| 地图 | Leaflet + Sveaflet |
+| 部署 | Vercel |
+
+---
+
+## 快速开始
+
+```bash
+# 安装依赖
+pnpm install
+
+# 启动开发服务器
+pnpm dev
+
+# 构建生产版本
+pnpm build
 ```
 
-## Developing
+---
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## 插件生态
 
-```sh
-npm run dev
+VETO 支持通过插件扩展能力。官方插件库持续维护中：
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+> **[VetoExpress / veto-plugins](https://github.com/VetoExpress/veto-plugins)**
 
-## Building
+---
 
-To create a production version of your app:
+## 许可证
 
-```sh
-npm run build
-```
+[LICENSE](./LICENSE)
 
-You can preview the production build with `npm run preview`.
+---
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## 致谢
+
+军事符号渲染基于 [**milsymbol**](https://github.com/spatialillusions/milsymbol) 实现，遵循 MIL-STD-2525 标准。感谢 [@spatialillusions](https://github.com/spatialillusions) 的出色工作。
