@@ -10,11 +10,10 @@ export interface GameClockState {
 }
 
 /** 可选流速档位（单位：模拟秒/真实秒） */
-export const TIME_SCALES = [1, 60, 3600, 86400] as const;
+export const TIME_SCALES = [60, 3600, 86400] as const;
 export type TimeScale = (typeof TIME_SCALES)[number];
 
 export const TIME_SCALE_LABELS: Record<number, string> = {
-	1: '1×',
 	60: '1分/秒',
 	3600: '1时/秒',
 	86400: '1日/秒'

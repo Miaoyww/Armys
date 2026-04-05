@@ -3,22 +3,21 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Ruler, Save, Activity } from '@lucide/svelte';
 	import SettingsButton from '$lib/components/buttons/right-bar/settings-button.svelte';
-	import { rightBarPinned } from '$lib/stores/sidebar-store';
+	import { rightBarPinned } from '$lib/stores/ui-store';
 	import PinButton from '../buttons/right-bar/pin-button.svelte';
 	import { flushRuntimePositions, saveBattlesNow, interactionMode } from '$lib/stores/battle-store';
 	import { toast } from 'svelte-sonner';
 	import UnitsCard from '$lib/components/map/cards/units-card.svelte';
+	import { unitsCardOpen } from '$lib/stores/ui-store';
 
 	// 是否鼠标悬停
 	let hover = $state(false);
 
-	export function save() {
+	function save() {
 		flushRuntimePositions();
 		saveBattlesNow();
 		toast.success('已保存', { description: '当前推演状态已保存到浏览器。' });
 	}
-
-	let simUnitsOpen = $state(false);
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -49,8 +48,8 @@
 				<Button
 					variant="ghost"
 					size="icon"
-					class={simUnitsOpen ? 'text-foreground' : ''}
-					onclick={() => (simUnitsOpen = !simUnitsOpen)}
+				class={$unitsCardOpen ? 'text-foreground' : ''}
+				onclick={() => ($unitsCardOpen = !$unitsCardOpen)}
 				>
 					<Activity />
 				</Button>
@@ -72,7 +71,7 @@
 	</div>
 </div>
 
-<UnitsCard bind:open={simUnitsOpen} />
+<UnitsCard bind:open={$unitsCardOpen} />
 
 <style>
 	.sidebar {

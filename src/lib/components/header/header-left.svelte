@@ -3,7 +3,7 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { PanelsTopLeft, ArrowLeft } from '@lucide/svelte';
 	import MapTypeButton from '$lib/components/buttons/map-type-button.svelte';
-	import { leftBarPinned } from '$lib/stores/sidebar-store';
+	import { leftBarPinned } from '$lib/stores/ui-store';
 	import { currentBattle, selectFaction } from '$lib/stores/battle-store';
 
 	function togglePin() {

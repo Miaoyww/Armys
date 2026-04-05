@@ -11,6 +11,7 @@
 	import MeasureCard from './cards/measure-card.svelte';
 	import InteractionModeHint from './cards/interaction-mode-hint.svelte';
 	import RouteConfirmCard from './cards/route-confirm-card.svelte';
+	import { routeConfirmOpen } from '$lib/stores/ui-store';
 	import {
 		currentBattle,
 		currentFactionId,
@@ -46,9 +47,6 @@
 
 	// 打击目标状态（由 StrikeCard 拥有，通过 bind 同步供 InteractionModeHint 使用）
 	let strikePendingTarget: { lat: number; lng: number } | null = $state(null);
-
-	// 待确认路线确认卡开关
-	let routeConfirmOpen = $state(false);
 
 	// 地图上的图层引用
 	let markersLayer: L.LayerGroup;
@@ -389,7 +387,7 @@
 		const mode = $interactionMode;
 		if (_prevInteractionMode === 'route' && mode !== 'route') {
 			if ($pendingRoute && $pendingRoute.points.length > 0) {
-				routeConfirmOpen = true;
+				routeConfirmOpen.set(true);
 			} else {
 				cancelPendingRoute();
 			}
@@ -468,7 +466,7 @@
 </div>
 
 <!-- 路线指令待确认卡片（Esc 退出绘制后弹出） -->
-<RouteConfirmCard bind:open={routeConfirmOpen} />
+<RouteConfirmCard bind:open={$routeConfirmOpen} />
 
 <!-- 打击目标浮动卡片 -->
 <StrikeCard {map} bind:pendingTarget={strikePendingTarget} />

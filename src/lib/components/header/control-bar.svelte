@@ -22,8 +22,6 @@
 		gameClock.update((c) => ({ ...c, isPaused: !c.isPaused }));
 	}
 
-	const DISPLAY_SCALES = TIME_SCALES.filter((s) => s !== 1);
-
 	function setTimeScale(scale: number) {
 		gameClock.update((c) => ({ ...c, timeScale: scale }));
 	}
@@ -31,7 +29,7 @@
 	/** 战局中保存的自定义流速（不在预设档位中时显示） */
 	const savedCustomScale = $derived(
 		$currentBattle?.timeScale != null &&
-			!(DISPLAY_SCALES as readonly number[]).includes($currentBattle.timeScale)
+			!(TIME_SCALES as readonly number[]).includes($currentBattle.timeScale)
 			? $currentBattle.timeScale
 			: null
 	);
@@ -103,7 +101,7 @@
 	<!-- 流速选择 -->
 	<div class="flex items-center gap-1.5">
 		<Gauge size={13} class="text-muted-foreground" />
-		{#each DISPLAY_SCALES as scale}
+		{#each TIME_SCALES as scale}
 			<Button
 				onclick={() => setTimeScale(scale)}
 				variant={$gameClock.timeScale === scale ? 'default' : 'outline'}

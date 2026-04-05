@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button';
 	import { Pin, PinOff } from '@lucide/svelte';
-	import { rightBarPinned } from '$lib/stores/sidebar-store';
+	import { rightBarPinned } from '$lib/stores/ui-store';
 
 	function togglePin() {
 		rightBarPinned.update((prev) => !prev);

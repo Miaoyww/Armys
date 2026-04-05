@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { leftBarPinned } from '$lib/stores/sidebar-store';
+	import { leftBarPinned } from '$lib/stores/ui-store';
 	import { quintOut } from 'svelte/easing';
 	import { fade, fly } from 'svelte/transition';
 	import { currentBattle, currentFaction, addFaction } from '$lib/stores/battle-store';
@@ -17,6 +17,7 @@
 	import { Plus, Swords, List, Flag, ScrollText, X } from '@lucide/svelte';
 	import FactionCard from '$lib/components/map/cards/faction-card.svelte';
 	import UnitPanel from '$lib/components/sidebar/unit-panel.svelte';
+	import { unitPanelVisible } from '$lib/stores/ui-store';
 
 	function randomColor() {
 		const hue = Math.floor(Math.random() * 360);
@@ -29,24 +30,19 @@
 
 	// 分离两个可见状态，使 unit-panel 先于 leftbar 关闭
 	let leftBarVisible = $state($leftBarPinned);
-	let unitPanelVisible = $state($leftBarPinned && !!$currentFaction);
 
 	$effect(() => {
 		if ($leftBarPinned) {
 			leftBarVisible = true;
 		} else {
-			unitPanelVisible = false;
+			unitPanelVisible.set(false);
 			const t = setTimeout(() => {
 				leftBarVisible = false;
 			}, 210); // unit-panel out:fade 180ms，稍留余量
 			return () => clearTimeout(t);
 		}
-	});
 
-	$effect(() => {
-		if ($leftBarPinned) {
-			unitPanelVisible = !!$currentFaction;
-		}
+		console.log($unitPanelVisible);
 	});
 
 	function handleAddFaction() {
@@ -74,8 +70,8 @@
 {#if leftBarVisible}
 	<div
 		class="sidebar-wrap absolute top-24 bottom-24 left-5 z-[1000] w-[22rem]"
-		in:fly={{ x: -28, duration: 260, easing: quintOut }}
-		out:fade={{ duration: 220 }}
+		in:fly={{ x: -20, duration: 240, easing: quintOut }}
+		out:fade={{ duration: 180 }}
 	>
 		<Card class="h-full gap-0 py-0 bg-background/75 backdrop-blur-md">
 			<CardHeader class="border-b px-5 py-4">
@@ -194,7 +190,7 @@
 	</div>
 {/if}
 
-{#if unitPanelVisible}
+{#if $unitPanelVisible}
 	<div
 		class="absolute top-24 bottom-24 z-[999] w-[24rem] overflow-hidden rounded-xl border"
 		style="left: calc(20px + 22rem + 12px)"

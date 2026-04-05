@@ -10,7 +10,7 @@
 		addLog
 	} from '$lib/stores/battle-store';
 	import { gameClock } from '$lib/stores/game-clock.store';
-	import { leftBarPinned } from '$lib/stores/sidebar-store';
+	import { leftBarPinned } from '$lib/stores/ui-store';
 	import { startPendingRoute } from '$lib/stores/pending-route.store';
 
 	interface Props {
