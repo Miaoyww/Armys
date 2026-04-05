@@ -54,7 +54,7 @@ async function extractAndSaveAssets(zip: JSZip, pluginId: string): Promise<strin
  *   unitTemplates/*.json   → ModData.unitTemplates（自动合并所有文件）
  * 若 manifest.definitions 已存在，先以其为基础后再补充缺失字段。
  */
-async function buildStructuredModData(zip: JSZip, manifest: PluginManifest): Promise<string | null> {
+export async function buildStructuredModData(zip: JSZip, manifest: PluginManifest): Promise<string | null> {
 	let modData: ModData = {};
 
 	// 若 manifest.definitions 存在，先读取作为基础
@@ -237,7 +237,15 @@ export function injectToRegistry(plugin: InstalledPlugin): void {	let modData: M
 	if (plugin.definitions) {
 		try {
 			const parsed = JSON.parse(plugin.definitions) as ModData;
-			modData = { ...parsed, id: plugin.id, name: plugin.manifest.name };
+			// 保留 manifest 的关键元数据，避免被 definitions 中的旧值覆盖
+			modData = {
+				...parsed,
+				id: plugin.id,
+				name: plugin.manifest.name,
+				version: plugin.manifest.version,
+				author: plugin.manifest.author,
+				type: plugin.manifest.type
+			};
 		} catch {
 			// definitions 格式不兼容 ModData，跳过
 		}
@@ -274,16 +282,26 @@ export function injectToRegistry(plugin: InstalledPlugin): void {	let modData: M
  */
 export function activateBattleMods(enabledMods: string[] | undefined): void {
 	const allMods = registry.getModList();
-	if (!enabledMods || enabledMods.length === 0) {
-		// 无选择 → 全部启用
-		for (const { mod } of allMods) {
-			if (mod.id) registry.setModEnabled(mod.id, true);
+	console.log('Activated battle mods:', enabledMods);
+
+	if (enabledMods?.length === 0) {
+		console.log('No enabledMods specified, enabling all mods by default.');
+		for (const { source, mod } of allMods) {
+			if(mod.id && source === "system") registry.setModEnabled(mod.id, true);
 		}
 		return;
 	}
+
+	// 明确指定（含空数组）→ 系统 Mod 始终启用，用户 Mod 只启用列表中的
 	const enabledSet = new Set(enabledMods);
+	console.log('Enabled mod set:', enabledSet);
 	for (const { mod } of allMods) {
-		if (mod.id) registry.setModEnabled(mod.id, enabledSet.has(mod.id));
+		if (!mod.id) continue;
+		if (!enabledSet.has(mod.id)) continue;
+		registry.setModEnabled(mod.id, true);
 	}
-	console.log('Activated battle mods:', enabledMods);
+}
+
+export function cleanAllMods(): void {
+	registry.clear();
 }

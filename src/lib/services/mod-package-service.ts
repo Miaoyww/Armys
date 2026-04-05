@@ -10,7 +10,7 @@
 import JSZip from 'jszip';
 import type { InstalledPlugin, PluginManifest, ModAsset } from './plugin-db';
 import { dbSavePlugin, dbSaveAsset } from './plugin-db';
-import { injectToRegistry } from './plugin-registry';
+import { injectToRegistry, buildStructuredModData } from './plugin-registry';
 
 const IMAGE_EXTENSIONS = /\.(png|jpg|jpeg|gif|webp|svg)$/i;
 
@@ -70,7 +70,10 @@ export async function importModPackage(file: File): Promise<InstalledPlugin> {
 
 	// 3. 读取 definitions
 	let definitions: string | null = null;
-	if (manifest.definitions) {
+	if (manifest.type === 'faction' || manifest.type === 'campaign') {
+		// faction / campaign：从 zip 内按约定路径结构化加载（同在线安装逻辑）
+		definitions = await buildStructuredModData(zip, manifest);
+	} else if (manifest.definitions) {
 		const defPath =
 			typeof manifest.definitions === 'string'
 				? manifest.definitions
@@ -94,6 +97,21 @@ export async function importModPackage(file: File): Promise<InstalledPlugin> {
 				i18nRecord[locale] = await f.async('string');
 			} else {
 				console.warn(`[ModPackage] i18n 文件不存在（locale: ${locale}）：${path}`);
+			}
+		}
+	}
+	// faction / campaign：额外扫描 i18n/ 或 assets/i18n/ 目录
+	if (manifest.type === 'faction' || manifest.type === 'campaign') {
+		const i18nFiles = zip.filter(
+			(path, f) =>
+				!f.dir &&
+				(path.startsWith('i18n/') || path.startsWith('assets/i18n/')) &&
+				path.endsWith('.json')
+		);
+		for (const f of i18nFiles) {
+			const locale = f.name.split('/').pop()?.replace(/\.json$/i, '') ?? '';
+			if (locale && !i18nRecord[locale]) {
+				i18nRecord[locale] = await f.async('string');
 			}
 		}
 	}
@@ -121,7 +139,7 @@ export async function importModPackage(file: File): Promise<InstalledPlugin> {
 	await dbSavePlugin(record);
 
 	// 7. 注入运行时 ModRegistry
-	injectToRegistry(record);
+	//TODO: // injectToRegistry(record);
 
 	return record;
 }

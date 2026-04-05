@@ -1,19 +1,3 @@
-import { writable } from 'svelte/store';
-import type { BranchDefinition, CategoryDefinition, UnitTemplate, ModData } from './types';
-
-/**
- * 每次 registry 数据变化（inject / setModEnabled）时递增。
- * Svelte 组件订阅此 store 即可响应式感知注册表更新。
- */
-export const registryRevision = writable(0);
-
-export interface LoadedMod {
-	mod: ModData;
-	enabled: boolean;
-	/** 'system' = 基础游戏数据，'user' = 用户安装的 Mod */
-	source: 'system' | 'user';
-}
-
 /**
  * ModRegistry — 全局单例注册表，所有军种/大类/单位模板/i18n 文本均通过此注册。
  *
@@ -52,6 +36,23 @@ export interface LoadedMod {
  * });
  * ```
  */
+
+import { writable } from 'svelte/store';
+import type { BranchDefinition, CategoryDefinition, UnitTemplate, ModData } from './types';
+
+/**
+ * 每次 registry 数据变化（inject / setModEnabled）时递增。
+ * Svelte 组件订阅此 store 即可响应式感知注册表更新。
+ */
+export const registryRevision = writable(0);
+
+export interface LoadedMod {
+	mod: ModData;
+	enabled: boolean;
+	/** 'system' = 基础游戏数据，'user' = 用户安装的 Mod */
+	source: 'system' | 'user';
+}
+
 class ModRegistry {
 	/** 已注册军种（id → BranchDefinition） */
 	readonly branches = new Map<string, BranchDefinition>();
@@ -65,7 +66,7 @@ class ModRegistry {
 	/** 当前语言，默认 zh-CN */
 	private _locale = 'zh-CN';
 	/** 按注入顺序存储所有 Mod，含启用状态 */
-	private readonly _mods: LoadedMod[] = [];
+	private _mods: LoadedMod[] = [];
 
 	/**
 	 * 注入 Mod 数据包。同一 id 的 Mod 不会重复加载。
@@ -79,18 +80,22 @@ class ModRegistry {
 		// faction / scenario / ruleset / campaign 需战局显式激活，默认禁用
 		// utility / dependency 以及系统数据立即激活
 		const DEFERRED_TYPES = new Set(['faction', 'scenario', 'ruleset', 'campaign']);
-		const enabledByDefault =
-			source === 'system' || !DEFERRED_TYPES.has(normalized.type ?? '');
+		const enabledByDefault = source === 'system' || !DEFERRED_TYPES.has(normalized.type ?? '');
 
-		this._mods.push({ mod: normalized, enabled: enabledByDefault, source });
+		console.log(`Injecting mod [${source}]:`, normalized, 'Enabled by default:', enabledByDefault);
+
+		// 默认禁用Mod
+		this._mods.push({ mod: normalized, enabled: false, source });
+
 		if (enabledByDefault) {
-			this._applyModData(normalized);
+			// this._applyModData(normalized);
 			registryRevision.update((n) => n + 1);
 		}
 	}
 
 	/** 实际将 mod 数据写入各 Map */
 	private _applyModData(mod: ModData): void {
+		console.log(`Applying mod data: ${mod.id} - ${mod.name}`);
 		for (const branch of mod.branches ?? []) {
 			this.branches.set(branch.id, branch);
 		}
@@ -104,7 +109,9 @@ class ModRegistry {
 		if (i18nData) {
 			const firstVal = Object.values(i18nData)[0];
 			if (firstVal !== undefined && typeof firstVal === 'object') {
-				for (const [locale, keys] of Object.entries(i18nData as Record<string, Record<string, string>>)) {
+				for (const [locale, keys] of Object.entries(
+					i18nData as Record<string, Record<string, string>>
+				)) {
 					if (!this._i18n.has(locale)) this._i18n.set(locale, new Map());
 					const localeMap = this._i18n.get(locale)!;
 					for (const [key, val] of Object.entries(keys)) localeMap.set(key, val);
@@ -112,13 +119,15 @@ class ModRegistry {
 			} else {
 				if (!this._i18n.has(this._locale)) this._i18n.set(this._locale, new Map());
 				const localeMap = this._i18n.get(this._locale)!;
-				for (const [key, val] of Object.entries(i18nData as Record<string, string>)) localeMap.set(key, val);
+				for (const [key, val] of Object.entries(i18nData as Record<string, string>))
+					localeMap.set(key, val);
 			}
 		}
 	}
 
 	/** 启用/禁用某个 Mod（触发全量重建） */
 	setModEnabled(id: string, enabled: boolean): void {
+		console.log(`Setting mod enabled state: id=${id}, enabled=${enabled}`);
 		const entry = this._mods.find((m) => m.mod.id === id);
 		if (!entry || entry.enabled === enabled) return;
 		entry.enabled = enabled;
@@ -128,14 +137,20 @@ class ModRegistry {
 
 	/** 重建 Map 数据（按已启用 Mod 顺序重新注入） */
 	private _rebuild(): void {
+		console.log('Rebuilding registry data from enabled mods...');
+		this.clear();
+		for (const { mod, enabled } of this._mods) {
+			console.log(`Processing mod [${enabled ? 'enabled' : 'disabled'}]:`, mod.name);
+			if (enabled) this._applyModData(mod);
+		}
+		registryRevision.update((n) => n + 1);
+	}
+
+	public clear(): void {
 		this.branches.clear();
 		this.categories.clear();
 		this.unitTemplates.clear();
 		this._i18n.clear();
-		for (const { mod, enabled } of this._mods) {
-			if (enabled) this._applyModData(mod);
-		}
-		registryRevision.update((n) => n + 1);
 	}
 
 	/** 获取所有已加载 Mod 列表（含启用状态） */

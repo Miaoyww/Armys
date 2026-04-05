@@ -6,6 +6,7 @@
 	import { battles, currentBattleId } from '$lib/stores/battle-store';
 	import { activateBattleMods } from '$lib/services/plugin-registry';
 	import { get } from 'svelte/store';
+	import { registry } from '$lib/registry/mod-registry';
 
 	const battleId = page.params.battle_id ?? null;
 	const battle = get(battles).find((b) => b.id === battleId);
@@ -18,6 +19,8 @@
 	}
 
 	onMount(() => {
+		console.log('Battle page mounted with battle:', battle);
+		registry.clear();
 		if (exists && battle) {
 			activateBattleMods(battle.enabledMods);
 		}
