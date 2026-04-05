@@ -96,7 +96,7 @@ function handlePlacedCombat() {
 					.flatMap((f) => f.units)
 					.find((u) => u.id === targetPlaced.unitId);
 				const atkBase =
-					targetMilUnit?.branch === 'air_force'
+					targetMilUnit?.branchId === 'air_force'
 						? attackerPlaced.stats.airAttack
 						: attackerPlaced.stats.softAttack * (1 - th) + attackerPlaced.stats.hardAttack * th;
 				const netDmg = Math.max(0, atkBase * efficiency - targetPlaced.stats.defense * 0.5);

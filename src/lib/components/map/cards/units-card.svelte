@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { currentBattle, runtimePositions } from '$lib/stores/battle-store';
+	import { registry } from '$lib/registry/mod-registry';
 	import { pendingRoute } from '$lib/stores/pending-route.store';
 	import { Button } from '$lib/components/ui/button';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
@@ -40,10 +41,7 @@
 
 	// ── 辅助函数 ──
 	function branchLabel(branch: string): string {
-		if (branch === 'army') return '陆军';
-		if (branch === 'navy') return '海军';
-		if (branch === 'air_force') return '空军';
-		return branch;
+		return registry.getLabel('branch.' + branch, branch);
 	}
 
 	/** 从 currentBattle 查找单位名称与所属阵营颜色 */
@@ -56,7 +54,7 @@
 		if (!faction) return null;
 		const unit = faction.units.find((u) => u.id === placed.unitId);
 		if (!unit) return null;
-		return { name: unit.name, color: faction.color, branch: unit.branch };
+		return { name: unit.name, color: faction.color, branch: unit.branchId };
 	}
 
 	// 派生: 当前战局所有已放置单位列表

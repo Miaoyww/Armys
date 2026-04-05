@@ -1,35 +1,33 @@
 import * as L from 'leaflet';
-import type { MilitaryUnit, PlacedUnit, Faction, NatoUnitType, UnitSide } from '$lib/types';
+import type { UnitTemplate, PlacedUnit, Faction } from '$lib/types';
+import { registry } from '$lib/registry/mod-registry';
 import { getMilSymbolSVG, getMilSymbolAnchor } from './milsymbol-utils';
 
-/** 从 MilitaryUnit 推导北约单位类型 */
-export function deriveNatoType(unit: MilitaryUnit): NatoUnitType {
-	if (unit.branch === 'navy') return 'navy';
-	if (unit.branch === 'air_force') return 'aviation';
-	const armorCount = unit.armor.reduce((s, c) => s + c.count, 0);
-	const infantryCount = unit.infantry.reduce((s, c) => s + c.count, 0);
-	const missileCount = unit.missiles.reduce((s, c) => s + c.count, 0);
-	if (missileCount > armorCount && missileCount > infantryCount) return 'artillery';
-	if (armorCount > 0 && infantryCount > 0) return 'mechanized';
-	if (armorCount > infantryCount) return 'armor';
-	return 'infantry';
+/**
+ * 从 PlacedUnit 解析最终使用的北约功能代码。
+ * 优先级：placed.natoCode > registry.getNatoCode(template)
+ */
+export function resolveNatoCode(template: UnitTemplate, placed: PlacedUnit): string {
+	return placed.natoCode ?? registry.getNatoCode(template);
 }
 
 /** 生成北约风格 DivIcon（含 milsymbol 符号 + HP/Org 进度条 + 选中高亮环） */
 export function getNatoIcon(
-	unit: MilitaryUnit,
+	unit: UnitTemplate,
 	faction: Faction,
 	placed: PlacedUnit,
 	selected: boolean
 ): L.DivIcon {
-	const side: UnitSide = faction.side ?? 'blue';
-	const natoType: NatoUnitType = placed.natoType ?? deriveNatoType(unit);
+	const side: string = faction.side ?? 'blue';
+	const natoCode: string = resolveNatoCode(unit, placed);
 
-	const symSvg = getMilSymbolSVG(natoType, side, 35, faction.color);
-	const anchor = getMilSymbolAnchor(natoType, side, 35);
+	const symSvg = getMilSymbolSVG(natoCode, side, 35, faction.color);
+	const anchor = getMilSymbolAnchor(natoCode, side, 35);
 
-	const hpPct = placed.stats.maxHp > 0 ? Math.max(0, Math.min(1, placed.hp / placed.stats.maxHp)) : 1;
-	const orgPct = placed.stats.maxOrg > 0 ? Math.max(0, Math.min(1, placed.org / placed.stats.maxOrg)) : 1;
+	const maxHp = placed.stats['maxHp'] ?? 1;
+	const maxOrg = placed.stats['maxOrg'] ?? 1;
+	const hpPct = maxHp > 0 ? Math.max(0, Math.min(1, placed.hp / maxHp)) : 1;
+	const orgPct = maxOrg > 0 ? Math.max(0, Math.min(1, placed.org / maxOrg)) : 1;
 	const hpW = Math.round(56 * hpPct);
 	const orgW = Math.round(56 * orgPct);
 	const hpColor = hpPct > 0.5 ? '#22c55e' : hpPct > 0.25 ? '#f59e0b' : '#ef4444';

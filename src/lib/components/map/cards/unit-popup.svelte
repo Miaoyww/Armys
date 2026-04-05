@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { BRANCH_LABELS, UNIT_STATUS_LABELS, NATO_UNIT_TYPE_LABELS } from '$units';
-	import type { MilitaryUnit, PlacedUnit, Faction, NatoUnitType, UnitSide } from '$lib/types';
+	import type { UnitTemplate, PlacedUnit, Faction } from '$lib/types';
+	import { registry } from '$lib/registry/mod-registry';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import {
 		Heart,
@@ -15,42 +15,35 @@
 	import NatoSymbol from '../nato-symbol.svelte';
 	import { runtimePositions } from '$lib/stores/battle-store';
 
-	let { unit, faction, placed }: { unit: MilitaryUnit; faction: Faction; placed: PlacedUnit } =
+	let { unit, faction, placed }: { unit: UnitTemplate; faction: Faction; placed: PlacedUnit } =
 		$props();
 
-	// 推导北约类型（与 map.svelte 保持一致）
-	function deriveNatoType(u: MilitaryUnit): NatoUnitType {
-		if (u.branch === 'navy') return 'navy';
-		if (u.branch === 'air_force') return 'aviation';
-		const ac = u.armor.reduce((s, c) => s + c.count, 0);
-		const ic = u.infantry.reduce((s, c) => s + c.count, 0);
-		const mc = u.missiles.reduce((s, c) => s + c.count, 0);
-		if (mc > ac && mc > ic) return 'artillery';
-		if (ac > 0 && ic > 0) return 'mechanized';
-		if (ac > ic) return 'armor';
-		return 'infantry';
-	}
-
-	const natoType = $derived<NatoUnitType>(placed.natoType ?? deriveNatoType(unit));
-	const side = $derived<UnitSide>(faction.side ?? 'blue');
+	// 解析北约功能代码（placed.natoCode 可覆盖模板）
+	const natoCode = $derived<string>(placed.natoCode ?? registry.getNatoCode(unit));
+	const side = $derived<string>(faction.side ?? 'blue');
 
 	const liveRt = $derived($runtimePositions[placed.id]);
 	const liveHp = $derived(liveRt?.hp ?? placed.hp);
 	const liveOrg = $derived(liveRt?.org ?? placed.org);
-	const liveStatus = $derived((liveRt?.status ?? placed.status) as PlacedUnit['status']);
+	const liveStatus = $derived(liveRt?.status ?? placed.status);
 
-	const hpPct = $derived(placed.stats.maxHp > 0 ? (liveHp / placed.stats.maxHp) * 100 : 100);
-	const orgPct = $derived(placed.stats.maxOrg > 0 ? (liveOrg / placed.stats.maxOrg) * 100 : 100);
+	const maxHp = $derived(placed.stats['maxHp'] ?? 1);
+	const maxOrg = $derived(placed.stats['maxOrg'] ?? 1);
+	const hpPct = $derived(maxHp > 0 ? (liveHp / maxHp) * 100 : 100);
+	const orgPct = $derived(maxOrg > 0 ? (liveOrg / maxOrg) * 100 : 100);
 	const hpBarClass = $derived(
 		hpPct > 50 ? 'bg-green-500' : hpPct > 25 ? 'bg-amber-400' : 'bg-red-500'
 	);
+
+	// 大类显示标签
+	const categoryLabel = $derived(registry.getLabel('category.' + unit.categoryId, unit.categoryId));
 </script>
 
 <div class="min-w-56 py-1 font-sans">
 	<!-- ── 标题区：北约图标 + 名称 ── -->
 	<div class="flex items-center gap-3 pb-2">
 		<div class="flex-shrink-0 drop-shadow-md">
-			<NatoSymbol type={natoType} {side} size={52} color={faction.color} />
+			<NatoSymbol {natoCode} {side} size={52} color={faction.color} />
 		</div>
 		<div class="min-w-0 flex-1">
 			<p class="truncate text-sm font-bold leading-tight text-foreground">{unit.name}</p>
@@ -60,11 +53,11 @@
 					style="background: {faction.color};"
 				></span>
 				<span class="truncate text-xs text-stone-500"
-					>{faction.name} · {BRANCH_LABELS[unit.branch]}</span
+					>{faction.name} · {registry.getLabel('branch.' + unit.branchId, unit.branchId)}</span
 				>
 			</div>
 			<p class="mt-0.5 text-[10px] font-medium text-muted-foreground">
-				{NATO_UNIT_TYPE_LABELS[natoType]}
+				{categoryLabel}
 			</p>
 		</div>
 	</div>
@@ -77,13 +70,12 @@
 			<div class="flex flex-1 flex-col gap-0.5">
 				<div class="flex items-center justify-between">
 					<span class="text-[10px] font-medium text-muted-foreground">生命值</span>
-						<span class="font-mono text-[10px] text-muted-foreground">{Math.round(liveHp)}/{placed.stats.maxHp}</span>
+					<span class="font-mono text-[10px] text-muted-foreground"
+						>{Math.round(liveHp)}/{maxHp}</span
+					>
 				</div>
 				<div class="h-1.5 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
-					<div
-						class="h-1.5 rounded-full transition-all {hpBarClass}"
-						style="width:{hpPct}%;"
-					></div>
+					<div class="h-1.5 rounded-full transition-all {hpBarClass}" style="width:{hpPct}%;"></div>
 				</div>
 			</div>
 		</div>
@@ -93,7 +85,9 @@
 			<div class="flex flex-1 flex-col gap-0.5">
 				<div class="flex items-center justify-between">
 					<span class="text-[10px] font-medium text-muted-foreground">组织度</span>
-						<span class="font-mono text-[10px] text-muted-foreground">{Math.round(liveOrg)}/{placed.stats.maxOrg}</span>
+					<span class="font-mono text-[10px] text-muted-foreground"
+						>{Math.round(liveOrg)}/{maxOrg}</span
+					>
 				</div>
 				<div class="h-1.5 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-stone-700">
 					<div
@@ -113,35 +107,35 @@
 			<Swords class="h-3 w-3 flex-shrink-0 text-orange-500" />
 			<span class="text-[10px] text-muted-foreground">软攻击</span>
 			<span class="ml-auto font-mono text-[10px] font-semibold text-foreground"
-				>{placed.stats.softAttack}</span
+				>{placed.stats['softAttack'] ?? 0}</span
 			>
 		</div>
 		<div class="flex items-center gap-1.5">
 			<Wrench class="h-3 w-3 flex-shrink-0 text-zinc-500" />
 			<span class="text-[10px] text-muted-foreground">硬攻击</span>
 			<span class="ml-auto font-mono text-[10px] font-semibold text-foreground"
-				>{placed.stats.hardAttack}</span
+				>{placed.stats['hardAttack'] ?? 0}</span
 			>
 		</div>
 		<div class="flex items-center gap-1.5">
 			<PlaneTakeoff class="h-3 w-3 flex-shrink-0 text-sky-500" />
 			<span class="text-[10px] text-muted-foreground">空攻击</span>
 			<span class="ml-auto font-mono text-[10px] font-semibold text-foreground"
-				>{placed.stats.airAttack}</span
+				>{placed.stats['airAttack'] ?? 0}</span
 			>
 		</div>
 		<div class="flex items-center gap-1.5">
 			<ShieldHalf class="h-3 w-3 flex-shrink-0 text-blue-500" />
 			<span class="text-[10px] text-muted-foreground">防御</span>
 			<span class="ml-auto font-mono text-[10px] font-semibold text-foreground"
-				>{placed.stats.defense}</span
+				>{placed.stats['defense'] ?? 0}</span
 			>
 		</div>
 		<div class="col-span-2 flex items-center gap-1.5">
 			<Gauge class="h-3 w-3 flex-shrink-0 text-green-500" />
 			<span class="text-[10px] text-muted-foreground">速度</span>
 			<span class="ml-auto font-mono text-[10px] font-semibold text-foreground"
-				>{placed.stats.speed} km/h</span
+				>{placed.stats['speed'] ?? 0} km/h</span
 			>
 		</div>
 	</div>
@@ -152,7 +146,9 @@
 	<div class="flex flex-col gap-1">
 		<div class="flex items-center justify-between gap-4">
 			<span class="text-xs text-muted-foreground">状态</span>
-			<span class="text-xs font-medium text-foreground">{UNIT_STATUS_LABELS[liveStatus]}</span>
+			<span class="text-xs font-medium text-foreground"
+				>{registry.getLabel('status.' + liveStatus, liveStatus)}</span
+			>
 		</div>
 		<div class="flex items-center justify-between gap-4">
 			<MapPin class="h-3 w-3 text-muted-foreground/50" />

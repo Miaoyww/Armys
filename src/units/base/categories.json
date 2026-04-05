@@ -1,0 +1,119 @@
+[
+  {
+    "id": "army.infantry",
+    "branchId": "army",
+    "natoCode": "GUCI---",
+    "componentGroups": [
+      {
+        "key": "infantry",
+        "types": ["light", "mechanized", "airborne", "marine"],
+        "qualities": ["basic", "standard", "advanced", "elite"],
+        "defaultCount": 1000
+      }
+    ]
+  },
+  {
+    "id": "army.armor",
+    "branchId": "army",
+    "natoCode": "GUCA---",
+    "componentGroups": [
+      {
+        "key": "armor",
+        "types": ["light_tank", "main_tank", "apc", "ifv"],
+        "qualities": ["gen1", "gen2", "gen3", "gen4", "gen5"],
+        "defaultCount": 50
+      }
+    ]
+  },
+  {
+    "id": "army.missile",
+    "branchId": "army",
+    "natoCode": "GUCF---",
+    "componentGroups": [
+      {
+        "key": "missiles",
+        "types": ["anti_tank", "surface_air", "cruise", "ballistic"],
+        "qualities": ["basic", "guided", "precision", "advanced"],
+        "defaultCount": 20
+      }
+    ]
+  },
+  {
+    "id": "navy.surface",
+    "branchId": "navy",
+    "natoCode": "SC-----",
+    "componentGroups": [
+      {
+        "key": "surface",
+        "types": ["destroyer", "frigate", "cruiser", "carrier"],
+        "qualities": ["basic", "guided", "advanced", "cutting_edge"],
+        "defaultCount": 2
+      }
+    ]
+  },
+  {
+    "id": "navy.submarine",
+    "branchId": "navy",
+    "natoCode": "UC-----",
+    "componentGroups": [
+      {
+        "key": "submarines",
+        "types": ["attack_sub", "missile_sub", "nuclear_sub", "ssbn"],
+        "qualities": ["basic", "stealth", "advanced", "nuclear"],
+        "defaultCount": 1
+      }
+    ]
+  },
+  {
+    "id": "navy.support",
+    "branchId": "navy",
+    "natoCode": "SC---E-",
+    "componentGroups": [
+      {
+        "key": "support",
+        "types": ["amphibious", "logistics", "mine", "patrol"],
+        "qualities": ["basic", "standard", "advanced", "specialized"],
+        "defaultCount": 1
+      }
+    ]
+  },
+  {
+    "id": "air_force.fighter",
+    "branchId": "air_force",
+    "natoCode": "AMF----",
+    "componentGroups": [
+      {
+        "key": "fighters",
+        "types": ["air_superiority", "multi_role", "interceptor", "stealth"],
+        "qualities": ["gen4", "gen4plus", "gen5", "gen6"],
+        "defaultCount": 12
+      }
+    ]
+  },
+  {
+    "id": "air_force.bomber",
+    "branchId": "air_force",
+    "natoCode": "AMB----",
+    "componentGroups": [
+      {
+        "key": "bombers",
+        "types": ["strategic", "tactical", "stealth_bomber", "fighter_bomber"],
+        "qualities": ["basic", "advanced", "stealth", "hypersonic"],
+        "defaultCount": 4
+      }
+    ]
+  },
+  {
+    "id": "air_force.support",
+    "branchId": "air_force",
+    "natoCode": "AMQ----",
+    "componentGroups": [
+      {
+        "key": "support",
+        "types": ["awacs", "tanker", "transport", "recon"],
+        "qualities": ["basic", "standard", "advanced", "specialized"],
+        "defaultCount": 2
+      }
+    ]
+  }
+]

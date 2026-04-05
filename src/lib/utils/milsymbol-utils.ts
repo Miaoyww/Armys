@@ -1,40 +1,28 @@
 /**
  * milsymbol 工具函数
- * 将项目内部的 NatoUnitType / UnitSide 映射到 MIL-STD-2525C letter SIDC，
- * 并封装常用的 SVG 生成函数。
+ * natoCode 格式：7 字符 = 维度字符(1) + MIL-STD-2525C 功能ID(6)
+ * 示例："GUCI---" → Ground(G) + Infantry(UCI---)
+ * 生成的 SIDC（10 位）：S + Affiliation + natoCode[0] + P + natoCode.slice(1)
  */
 import ms from 'milsymbol';
-import type { NatoUnitType, UnitSide } from '$lib/types';
 import type { SymbolOptions } from 'milsymbol';
 
-/** 立场 → SIDC 中的 Affiliation 字符 (position 1) */
-const SIDE_TO_AFFILIATION: Record<UnitSide, string> = {
+/** 立场 → SIDC 中的 Affiliation 字符（position 1） */
+const SIDE_TO_AFFILIATION: Record<string, string> = {
 	blue: 'F', // Friend
 	red: 'H', // Hostile
 	neutral: 'N' // Neutral
 };
 
 /**
- * 北约单位类型 → SIDC Function ID（positions 4-9，共 6 位）
- * 参考 MIL-STD-2525C 及 milsymbol 内置 SIDC 表
+ * 从 natoCode（7 字符）和立场生成 10 位 MIL-STD-2525C letter SIDC。
+ * @param natoCode  7 字符功能代码，如 "GUCI---"（地面步兵）
+ * @param side      立场字符串，如 "blue" | "red" | "neutral"
  */
-const NATO_TYPE_TO_FUNCTION: Record<NatoUnitType, { dimension: string; fn: string }> = {
-	infantry: { dimension: 'G', fn: 'UCI---' }, // Ground Combat Infantry
-	armor: { dimension: 'G', fn: 'UCA---' }, // Ground Combat Armour
-	artillery: { dimension: 'G', fn: 'UCF---' }, // Ground Combat Field Artillery
-	mechanized: { dimension: 'G', fn: 'UCIZ--' }, // Ground Combat Armor + Infantry (Mech)
-	aviation: { dimension: 'A', fn: 'MF----' }, // Air Military Fixed Wing
-	navy: { dimension: 'S', fn: 'C-----' }, // Sea Surface Combatant
-	headquarters: { dimension: 'G', fn: 'UH1---' } // Ground HQ/Headquarters
-};
-
-/**
- * 生成 10 位 MIL-STD-2525C letter SIDC
- * 格式: [S][Affil][Dim][P][FunctionID(6)]
- */
-export function getSIDC(type: NatoUnitType, side: UnitSide): string {
+export function getSIDC(natoCode: string, side: string): string {
 	const affil = SIDE_TO_AFFILIATION[side] ?? 'F';
-	const { dimension, fn } = NATO_TYPE_TO_FUNCTION[type] ?? NATO_TYPE_TO_FUNCTION.infantry;
+	const dimension = natoCode[0] ?? 'G';
+	const fn = natoCode.slice(1).padEnd(6, '-');
 	return `S${affil}${dimension}P${fn}`;
 }
 
@@ -58,17 +46,20 @@ function toRgba(color: string, alpha: number): string {
 
 /**
  * 使用 milsymbol 生成 SVG 字符串
+ * @param natoCode     7 字符北约功能代码（来自 registry.getNatoCode(template)）
+ * @param side         立场字符串
+ * @param size         符号尺寸（px）
  * @param factionColor 阵营自定义颜色（传入时覆盖北约默认配色）
+ * @param extra        milsymbol 其他选项
  */
 export function getMilSymbolSVG(
-	type: NatoUnitType,
-	side: UnitSide,
+	natoCode: string,
+	side: string,
 	size: number = 35,
 	factionColor?: string,
 	extra: Partial<SymbolOptions> = {}
 ): string {
-	const sidc = getSIDC(type, side);
-	// 只染填充背景和内部图标为阵营色，描边保持黑色默认（最稳健的对比度方案）
+	const sidc = getSIDC(natoCode, side);
 	const colorOptions: Partial<SymbolOptions> = factionColor
 		? {
 				fillColor: toRgba(factionColor, 0.25),
@@ -89,11 +80,11 @@ export function getMilSymbolSVG(
  * 获取 milsymbol 符号的锚点（用于 Leaflet marker 对齐）
  */
 export function getMilSymbolAnchor(
-	type: NatoUnitType,
-	side: UnitSide,
+	natoCode: string,
+	side: string,
 	size: number = 35
 ): { x: number; y: number } {
-	const sidc = getSIDC(type, side);
+	const sidc = getSIDC(natoCode, side);
 	const sym = new ms.Symbol(sidc, { size, infoFields: false });
 	return sym.getAnchor();
 }
@@ -102,12 +93,11 @@ export function getMilSymbolAnchor(
  * 获取 milsymbol 符号的尺寸
  */
 export function getMilSymbolSize(
-	type: NatoUnitType,
-	side: UnitSide,
+	natoCode: string,
+	side: string,
 	size: number = 35
 ): { width: number; height: number } {
-	const sidc = getSIDC(type, side);
+	const sidc = getSIDC(natoCode, side);
 	const sym = new ms.Symbol(sidc, { size, infoFields: false });
-	const bbox = sym.getSize();
-	return bbox;
+	return sym.getSize();
 }

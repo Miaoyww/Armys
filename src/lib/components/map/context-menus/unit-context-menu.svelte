@@ -13,7 +13,7 @@
 		Trash2,
 		Check
 	} from '@lucide/svelte';
-	import { UNIT_STATUS_LABELS } from '$units';
+	import { registry } from '$lib/registry/mod-registry';
 	import type { PlacedUnit } from '$lib/types';
 	import * as L from 'leaflet';
 	import {
@@ -74,10 +74,8 @@
 			if (!placed) return false;
 			const unit = $currentBattle?.factions.flatMap((f) => f.units).find((u) => u.id === placed.unitId);
 			if (!unit) return false;
-			if (unit.branch === 'army') return unit.missiles.length > 0;
-			if (unit.branch === 'navy') return true; // 海军舰艇/潜艇均可打击
-			if (unit.branch === 'air_force') return unit.bombers.length > 0;
-			return false;
+			// 通过 tags 判断是否可设置打击目标（完全数据驱动，Mod 可自定义）
+			return unit.tags?.includes('can_strike') ?? false;
 		})()
 	);
 
@@ -183,11 +181,11 @@
 		open = false;
 	}
 
-	function handleSetStatus(status: PlacedUnit['status']) {
+	function handleSetStatus(status: string) {
 		const targetId = contextUnitId || $selectedPlacedUnitId;
 		if (targetId) {
-			updatePlacedUnit(targetId, { status }, `单位状态变更: ${UNIT_STATUS_LABELS[status]}`);
-			addLog(`单位状态变更: ${UNIT_STATUS_LABELS[status]}`);
+			updatePlacedUnit(targetId, { status }, `单位状态变更: ${registry.getLabel('status.' + status, status)}`);
+			addLog(`单位状态变更: ${registry.getLabel('status.' + status, status)}`);
 		}
 		contextUnitId = null;
 		open = false;
@@ -299,7 +297,7 @@
 									<Check
 										class="mr-2 size-4 {currentStatus === status ? 'opacity-100' : 'opacity-0'}"
 									/>
-									{UNIT_STATUS_LABELS[status]}
+									{registry.getLabel('status.' + status, status)}
 								</ContextMenu.Item>
 							{/each}
 						</ContextMenu.SubContent>

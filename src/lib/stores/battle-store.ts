@@ -1,5 +1,5 @@
 import { writable, derived, get } from 'svelte/store';
-import type { Battle, EventSetting, Faction, MilitaryUnit, PlacedUnit, ActionLogEntry, UnitSide } from '$lib/types';
+import type { Battle, EventSetting, Faction, UnitTemplate, PlacedUnit, ActionLogEntry, UnitSide } from '$lib/types';
 
 const STORAGE_KEY = 'wars_battles';
 
@@ -60,7 +60,7 @@ export const currentFaction = derived(
 );
 
 // ============ 当前选中的军种分支 ============
-export const currentBranch = writable<'army' | 'navy' | 'air_force'>('army');
+export const currentBranch = writable<string>('army');
 
 // ============ 当前选中的已放置单位ID ============
 export const selectedPlacedUnitId = writable<string | null>(null);
@@ -263,7 +263,7 @@ export function selectFaction(factionId: string) {
 
 // ============ 单位 CRUD ============
 
-export function addUnit(factionId: string, unit: MilitaryUnit) {
+export function addUnit(factionId: string, unit: UnitTemplate) {
 	pushUndoSnapshot(`创建单位: ${unit.name}`);
 	updateCurrentBattle((b) => ({
 		...b,
@@ -288,7 +288,7 @@ export function removeUnit(factionId: string, unitId: string) {
 	addLog(`删除单位: ${unit?.name ?? ''}`);
 }
 
-export function updateUnit(factionId: string, unitId: string, updater: (unit: MilitaryUnit) => MilitaryUnit, logMessage?: string) {
+export function updateUnit(factionId: string, unitId: string, updater: (unit: UnitTemplate) => UnitTemplate, logMessage?: string) {
 	const battle = get(currentBattle);
 	const unit = battle?.factions.find((f) => f.id === factionId)?.units.find((u) => u.id === unitId);
 	const unitName = unit?.name ?? '未知单位';

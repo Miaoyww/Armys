@@ -32,7 +32,7 @@
 		addPendingPoint,
 		cancelPendingRoute
 	} from '$lib/stores/pending-route.store';
-	import type { MilitaryUnit, PlacedUnit, Faction } from '$lib/types';
+	import type { UnitTemplate, PlacedUnit, Faction } from '$lib/types';
 	import {  getNatoIcon } from '$lib/utils/unit-icon';
 
 	let map: L.Map;
@@ -62,14 +62,14 @@
 	const iconStateCache: Record<string, { hp: number; org: number; status: string }> = {};
 
 	// 构建单位 Popup 内容节点
-	function createPopupElement(unit: MilitaryUnit, faction: Faction, placed: PlacedUnit): HTMLElement {
+	function createPopupElement(unit: UnitTemplate, faction: Faction, placed: PlacedUnit): HTMLElement {
 		const el = document.createElement('div');
 		mount(UnitPopup, { target: el, props: { unit, faction, placed } });
 		return el;
 	}
 
 	// 查找单位信息
-	function findUnit(unitId: string): { unit: MilitaryUnit; faction: Faction } | null {
+	function findUnit(unitId: string): { unit: UnitTemplate; faction: Faction } | null {
 		const battle = $currentBattle;
 		if (!battle) return null;
 		for (const faction of battle.factions) {

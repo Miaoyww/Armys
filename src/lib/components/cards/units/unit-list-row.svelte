@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MilitaryUnit, PlacedUnit } from '$lib/types';
+	import type { UnitTemplate, PlacedUnit } from '$lib/types';
 	import type { RuntimeUnitPosition } from '$lib/stores/battle-store';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -16,7 +16,7 @@
 		onDelete,
 		onRename
 	}: {
-		unit: MilitaryUnit;
+		unit: UnitTemplate;
 		isSelected?: boolean;
 		placed?: PlacedUnit;
 		runtimePos?: RuntimeUnitPosition;
