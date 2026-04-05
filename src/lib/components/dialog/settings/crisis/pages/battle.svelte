@@ -245,4 +245,8 @@
 	</div>
 </div>
 
-<EventConfigDialog bind:open={eventDrawerOpen} bind:eventSettings={eventSettingsDraft} />
+<EventConfigDialog
+	bind:open={eventDrawerOpen}
+	bind:eventSettings={eventSettingsDraft}
+	containerClass="fixed left-[calc(50%+26rem)] top-1/2 -translate-y-1/2 z-[1010] w-[360px] max-h-[80vh]"
+/>

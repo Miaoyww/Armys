@@ -6,6 +6,8 @@
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
+
 	import type { EventSetting } from '$lib/types';
 	import { Zap, X, Plus } from '@lucide/svelte';
 	import EventCard from '$lib/components/cards/settings/event-card.svelte';
@@ -73,7 +75,7 @@
 	<div
 		transition:fly={{ x: -180, duration: 280 }}
 		class={cn(
-			'flex flex-col overflow-hidden rounded-xl border shadow-xl bg-background/100',
+			'flex flex-col overflow-hidden rounded-xl border bg-background/100 shadow-xl',
 			containerClass
 		)}
 	>
@@ -85,7 +87,9 @@
 					<p class="text-sm font-semibold">突发事件配置</p>
 					<p class="text-xs text-muted-foreground">
 						已启用
-						<Badge variant="secondary" class="mx-0.5 h-4 px-1.5 text-[10px]">{enabledCount} / {localDraft.length}</Badge>
+						<Badge variant="secondary" class="mx-0.5 h-4 px-1.5 text-[10px]"
+							>{enabledCount} / {localDraft.length}</Badge
+						>
 						项
 					</p>
 				</div>
@@ -99,7 +103,7 @@
 
 		<!-- 事件列表 -->
 		<div class="scrollbar min-h-0 flex-1 overflow-y-auto">
-			<div class="flex flex-col gap-2 px-4 py-3">
+			<ScrollArea class="flex flex-col gap-2 px-4 py-3">
 				{#each localDraft as _, i (localDraft[i].id)}
 					<EventCard
 						bind:event={localDraft[i]}
@@ -120,12 +124,16 @@
 							placeholder="事件名称"
 							bind:value={newLabel}
 							class="h-8 text-sm"
-							onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter') addCustomEvent(); }}
+							onkeydown={(e: KeyboardEvent) => {
+								if (e.key === 'Enter') addCustomEvent();
+							}}
 						/>
 						<div class="space-y-1.5">
 							<div class="flex items-center justify-between">
 								<Label class="text-xs text-muted-foreground">初始触发概率</Label>
-								<span class="font-mono text-xs font-semibold tabular-nums text-amber-600 dark:text-amber-400">
+								<span
+									class="font-mono text-xs font-semibold text-amber-600 tabular-nums dark:text-amber-400"
+								>
 									{newProbability}%
 								</span>
 							</div>
@@ -151,13 +159,13 @@
 						</Button>
 					</Card.Content>
 				</Card.Root>
-			</div>
+			</ScrollArea>
 		</div>
 
 		<Separator />
 
 		<!-- 底部操作 -->
-		<div class="flex shrink-0 gap-2 px-4 py-3 bg-background/100 ">
+		<div class="flex shrink-0 gap-2 bg-background/100 px-4 py-3">
 			<Button variant="outline" class="flex-1" onclick={close}>取消</Button>
 			<Button class="flex-1" onclick={handleApply}>应用事件预设</Button>
 		</div>

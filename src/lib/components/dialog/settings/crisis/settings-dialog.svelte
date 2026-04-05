@@ -52,8 +52,8 @@
 <style>
 	.setting-dialog {
 		position: absolute;
-		min-width: 50rem;
-		min-height: 50rem;
+		min-width: 40rem;
+		min-height: 40rem;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);

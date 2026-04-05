@@ -34,8 +34,8 @@
 			<SettingsNav bind:activeSection class="blur-backdrop shrink-0 self-start" />
 
 			<!-- 右侧内容 -->
-			<div class="blur-backdrop flex-1 overflow-hidden rounded-lg ">
-				<ScrollArea class="h-screen w-full">
+			<div class="blur-backdrop flex-1 overflow-hidden rounded-lg">
+				<ScrollArea class="h-full w-full">
 					<div class="p-6">
 						{#if activeSection === 'venue'}<VenuePage />{/if}
 						{#if activeSection === 'mods'}<ModsPage />{/if}
