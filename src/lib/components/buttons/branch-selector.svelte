@@ -15,6 +15,7 @@
 
 	// 从注册表动态获取所有军种（按注册顺序排列）
 	const branches = $derived([...registry.branches.values()]);
+
 </script>
 
 <div class="flex items-center gap-1.5">

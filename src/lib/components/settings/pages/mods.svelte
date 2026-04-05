@@ -1,9 +1,19 @@
 <script lang="ts">
-	import { Puzzle, ExternalLink } from '@lucide/svelte';
-	import { Button } from '$lib/components/ui/button';
+	import { ExternalLink } from '@lucide/svelte';
+	import * as Tabs from '$lib/components/ui/tabs/index.js';
+	import { registry } from '$lib/registry/mod-registry';
+	import AllMods from './mods/all.svelte';
+	import ExistingMods from './mods/existing.svelte';
+	import InstallMod from './mods/install.svelte';
+
+	const stats = $derived({
+		branches: registry.branches.size,
+		categories: registry.categories.size,
+		templates: registry.unitTemplates.size
+	});
 </script>
 
-<div>
+<div class="flex flex-col">
 	<div class="mb-1 text-xl font-bold text-stone-800 dark:text-stone-100">Mod 管理</div>
 	<p class="mb-4 text-sm text-muted-foreground">
 		管理已安装的扩展包，Mod 以 JSON 格式导入。可在
@@ -17,11 +27,34 @@
 		</a>
 		浏览社区 Mod。
 	</p>
-	<div
-		class="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-stone-300 py-16 text-stone-400 dark:border-stone-700 dark:text-stone-500"
-	>
-		<Puzzle size={36} class="opacity-40" />
-		<span class="text-sm">暂无已安装的 Mod</span>
-		<Button variant="outline" size="sm" disabled>从文件导入 Mod</Button>
+
+	<!-- 统计栏 -->
+	<div class="mb-4 grid grid-cols-3 gap-2">
+		{#each [{ label: '军种', value: stats.branches }, { label: '单位大类', value: stats.categories }, { label: '单位模板', value: stats.templates }] as stat}
+			<div class="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-center">
+				<div class="text-lg font-bold text-foreground">{stat.value}</div>
+				<div class="text-xs text-muted-foreground">{stat.label}</div>
+			</div>
+		{/each}
 	</div>
+
+	<Tabs.Root value="all">
+		<Tabs.List>
+			<Tabs.Trigger value="all">全部</Tabs.Trigger>
+			<Tabs.Trigger value="installed">已安装</Tabs.Trigger>
+			<Tabs.Trigger value="install">安装</Tabs.Trigger>
+		</Tabs.List>
+
+		<Tabs.Content value="all">
+			<AllMods />
+		</Tabs.Content>
+
+		<Tabs.Content value="installed">
+			<ExistingMods />
+		</Tabs.Content>
+
+		<Tabs.Content value="install">
+			<InstallMod />
+		</Tabs.Content>
+	</Tabs.Root>
 </div>

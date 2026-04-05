@@ -1,5 +1,12 @@
 import type { BranchDefinition, CategoryDefinition, UnitTemplate, ModData } from './types';
 
+export interface LoadedMod {
+	mod: ModData;
+	enabled: boolean;
+	/** 'system' = 基础游戏数据，'user' = 用户安装的 Mod */
+	source: 'system' | 'user';
+}
+
 /**
  * ModRegistry — 全局单例注册表，所有军种/大类/单位模板/i18n 文本均通过此注册。
  *
@@ -46,18 +53,27 @@ class ModRegistry {
 	/** 已注册单位模板（id → UnitTemplate） */
 	readonly unitTemplates = new Map<string, UnitTemplate>();
 
-	private readonly _i18n = new Map<string, string>();
-	private readonly _loadedMods = new Set<string>();
+	/** locale → (key → text) */
+	private readonly _i18n = new Map<string, Map<string, string>>();
+	/** 当前语言，默认 zh-CN */
+	private _locale = 'zh-CN';
+	/** 按注入顺序存储所有 Mod，含启用状态 */
+	private readonly _mods: LoadedMod[] = [];
 
 	/**
 	 * 注入 Mod 数据包。同一 id 的 Mod 不会重复加载。
 	 * 各 Map 条目：后注入覆盖先注入。
 	 */
-	inject(mod: ModData): void {
-		if (mod.id) {
-			if (this._loadedMods.has(mod.id)) return;
-			this._loadedMods.add(mod.id);
-		}
+	inject(mod: ModData, source: LoadedMod['source'] = 'user'): void {
+		const id = mod.id ?? `_anon_${this._mods.length}`;
+		const normalized = { ...mod, id };
+		if (this._mods.some((m) => m.mod.id === id)) return;
+		this._mods.push({ mod: normalized, enabled: true, source });
+		this._applyModData(normalized);
+	}
+
+	/** 实际将 mod 数据写入各 Map */
+	private _applyModData(mod: ModData): void {
 		for (const branch of mod.branches ?? []) {
 			this.branches.set(branch.id, branch);
 		}
@@ -67,18 +83,72 @@ class ModRegistry {
 		for (const template of mod.unitTemplates ?? []) {
 			this.unitTemplates.set(template.id, template);
 		}
-		for (const [key, val] of Object.entries(mod.i18n ?? {})) {
-			this._i18n.set(key, val);
+		const i18nData = mod.i18n;
+		if (i18nData) {
+			const firstVal = Object.values(i18nData)[0];
+			if (firstVal !== undefined && typeof firstVal === 'object') {
+				// 分层格式：{ "zh-CN": { ... }, "en": { ... } }
+				for (const [locale, keys] of Object.entries(i18nData as Record<string, Record<string, string>>)) {
+					if (!this._i18n.has(locale)) this._i18n.set(locale, new Map());
+					const localeMap = this._i18n.get(locale)!;
+					for (const [key, val] of Object.entries(keys)) localeMap.set(key, val);
+				}
+			} else {
+				// 扁平格式（兼容旧版）：视为默认语言
+				if (!this._i18n.has(this._locale)) this._i18n.set(this._locale, new Map());
+				const localeMap = this._i18n.get(this._locale)!;
+				for (const [key, val] of Object.entries(i18nData as Record<string, string>)) localeMap.set(key, val);
+			}
 		}
+	}
+
+	/** 启用/禁用某个 Mod（触发全量重建） */
+	setModEnabled(id: string, enabled: boolean): void {
+		const entry = this._mods.find((m) => m.mod.id === id);
+		if (!entry || entry.enabled === enabled) return;
+		entry.enabled = enabled;
+		this._rebuild();
+	}
+
+	/** 重建 Map 数据（按已启用 Mod 顺序重新注入） */
+	private _rebuild(): void {
+		this.branches.clear();
+		this.categories.clear();
+		this.unitTemplates.clear();
+		this._i18n.clear();
+		for (const { mod, enabled } of this._mods) {
+			if (enabled) this._applyModData(mod);
+		}
+	}
+
+	/** 获取所有已加载 Mod 列表（含启用状态） */
+	getModList(): LoadedMod[] {
+		return [...this._mods];
+	}
+
+	/** 设置当前语言（如 'zh-CN'、'en'） */
+	setLocale(locale: string): void {
+		this._locale = locale;
+	}
+
+	/** 获取当前语言 */
+	getLocale(): string {
+		return this._locale;
 	}
 
 	/**
 	 * 万能标签解析函数。
+	 * 查找顺序：当前语言 → 第一个可用语言 → defaultText → path 本身
 	 * @param path  点路径，如 "branch.army"、"status.moving"、"type.infantry.light"
-	 * @param defaultText  找不到时的回退文本（若不传则回退为 path 本身）
+	 * @param defaultText  找不到时的回退文本
 	 */
 	getLabel(path: string, defaultText?: string): string {
-		return this._i18n.get(path) ?? defaultText ?? path;
+		return (
+			this._i18n.get(this._locale)?.get(path) ??
+			[...this._i18n.values()][0]?.get(path) ??
+			defaultText ??
+			path
+		);
 	}
 
 	/** 按 id 查找单位模板 */
@@ -121,7 +191,7 @@ class ModRegistry {
 		this.categories.clear();
 		this.unitTemplates.clear();
 		this._i18n.clear();
-		this._loadedMods.clear();
+		this._mods.length = 0;
 	}
 }
 

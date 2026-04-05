@@ -138,12 +138,15 @@ export interface ModData {
 	categories?: CategoryDefinition[];
 	/** 新增/覆盖单位模板 */
 	unitTemplates?: UnitTemplate[];
+
+
 	/**
-	 * 国际化文本（扁平点路径）。
-	 * 示例：{ "branch.army": "陆军", "status.moving": "行军" }
+	 * 国际化文本，支持两种格式：
+	 * - 扁平格式（单语言/兼容旧版）：{ "branch.army": "陆军" }，将作为默认语言存储
+	 * - 分层格式（多语言）：{ "zh-CN": { "branch.army": "陆军" }, "en": { "branch.army": "Army" } }
 	 * 后注入的值覆盖先前已有的同名键。
 	 */
-	i18n?: Record<string, string>;
+	i18n?: Record<string, string> | Record<string, Record<string, string>>;
 	/** 战斗公式覆盖 */
 	combatOverrides?: ModCombatOverrides;
 }

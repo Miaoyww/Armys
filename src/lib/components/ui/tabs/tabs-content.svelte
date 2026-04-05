@@ -12,6 +12,6 @@
 <TabsPrimitive.Content
 	bind:ref
 	data-slot="tabs-content"
-	class={cn("flex-1 outline-none rounded-lg blur-backdrop w-210 h-210 p-5", className)}
+	class={cn("outline-none w-full", className)}
 	{...restProps}
 />

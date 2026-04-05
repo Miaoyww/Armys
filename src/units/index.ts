@@ -24,7 +24,7 @@ const baseGameData: ModData = {
 	i18n: i18nJson
 };
 
-registry.inject(baseGameData);
+registry.inject(baseGameData, 'system');
 
 // 导出 registry 供组件直接使用
 export { registry } from '$lib/registry/mod-registry';
