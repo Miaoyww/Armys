@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
-	import { Minus, Maximize2, Minimize2, X, Settings2 } from '@lucide/svelte';
+	import { Minus, X, Settings, Square, SquaresUnite } from '@lucide/svelte';
 	import { currentBattle } from '$lib/stores/battle-store';
 	import { VETO_NAME } from '$lib/const';
+	import { Button } from '$lib/components/ui/button';
 
 	const isTauri = browser && '__TAURI_INTERNALS__' in window;
 
@@ -22,66 +23,75 @@
 			});
 		});
 	});
+
+	function onDragMouseDown(e: MouseEvent) {
+		if (e.buttons === 1 && appWindow) {
+			appWindow.startDragging();
+		}
+	}
 </script>
 
 {#if isTauri}
 	<div
-		class="fixed left-0 right-0 top-0 z-[9999] flex h-9 select-none items-stretch border-b border-border/30 bg-background"
-		data-tauri-drag-region
+		class="fixed top-0 right-0 left-0 z-[9999] flex h-9 items-stretch border-b border-border/30 bg-background select-none"
 	>
 		<!-- 左：应用名 -->
-		<div class="flex w-28 shrink-0 items-center pl-4" data-tauri-drag-region>
-			<span class="text-xs font-semibold uppercase tracking-[0.2em] text-foreground/50">
+		<div class="flex w-28 shrink-0 items-center pl-4" onmousedown={onDragMouseDown}>
+			<span class="text-xs font-semibold tracking-[0.2em] text-foreground/50 uppercase">
 				{VETO_NAME}
 			</span>
 		</div>
 
 		<!-- 中：当前战役名（可拖动） -->
-		<div class="flex flex-1 items-center justify-center" data-tauri-drag-region>
+		<div class="flex flex-1 items-center justify-center" onmousedown={onDragMouseDown}>
 			{#if $currentBattle}
-				<span class="max-w-xs truncate text-sm text-foreground/70">{$currentBattle.name}</span>
+				<span class="ml-16 max-w-xs truncate text-sm text-foreground/70">{$currentBattle.name}</span>
 			{/if}
 		</div>
 
 		<!-- 右：设置入口 + 分割线 + 窗口控制 -->
 		<div class="flex shrink-0 items-stretch">
-			<button
+			<Button
 				class="flex items-center justify-center px-3 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+				variant="ghost"
 				onclick={() => goto('/settings')}
 				title="前往设置"
 			>
-				<Settings2 size={14} />
-			</button>
+				<Settings size={14} />
+			</Button>
 
 			<div class="mx-0.5 my-2 w-px bg-border/40"></div>
 
-			<button
+			<Button
 				class="flex w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 				onclick={() => appWindow?.minimize()}
+				variant="ghost"
 				title="最小化"
 			>
 				<Minus size={14} />
-			</button>
+			</Button>
 
-			<button
+			<Button
 				class="flex w-11 items-center justify-center text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 				onclick={() => appWindow?.toggleMaximize()}
+				variant="ghost"
 				title={isMaximized ? '向下还原' : '最大化'}
 			>
 				{#if isMaximized}
-					<Minimize2 size={13} />
+					<SquaresUnite size={11} />
 				{:else}
-					<Maximize2 size={13} />
+					<Square size={11} />
 				{/if}
-			</button>
+			</Button>
 
-			<button
+			<Button
 				class="close-btn flex w-11 items-center justify-center text-muted-foreground transition-colors"
 				onclick={() => appWindow?.close()}
+				variant="ghost"
 				title="关闭"
 			>
 				<X size={14} />
-			</button>
+			</Button>
 		</div>
 	</div>
 {/if}

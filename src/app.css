@@ -29,7 +29,7 @@ body {
 	flex-direction: column;
 	scroll-behavior: smooth;
 	overscroll-behavior: none;
-	overflow-x: hidden;
+	overflow: hidden;
 	font-family: 'HarmonyOS SansSC', sans-serif;
 }
 
