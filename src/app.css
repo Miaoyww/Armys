@@ -29,8 +29,14 @@ body {
 	flex-direction: column;
 	scroll-behavior: smooth;
 	overscroll-behavior: none;
-	overflow: hidden;
+	overflow-x: hidden;
+	scrollbar-width: none;
 	font-family: 'HarmonyOS SansSC', sans-serif;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+	display: none;
 }
 
 /* background colours are defined in theme.css; only structural rules here */
