@@ -1,18 +1,11 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
-	import { PanelsTopLeft, ArrowLeft } from '@lucide/svelte';
+	import { ArrowLeft } from '@lucide/svelte';
 	import MapTypeButton from '$lib/components/buttons/map-type-button.svelte';
-	import { leftBarPinned } from '$lib/stores/ui-store';
-	import { currentBattle, selectFaction } from '$lib/stores/battle-store';
-
-	function togglePin() {
-		selectFaction('');
-		leftBarPinned.update((prev) => !prev);
-	}
+	import { currentBattle } from '$lib/stores/battle-store';
 </script>
 
-<div class="flex items-center gap-3 rounded-lg p-3 bg-background/75 backdrop-blur-md">
+<div class="flex items-center gap-3 rounded-lg bg-background/75 p-3 backdrop-blur-md">
 	<a
 		href="/"
 		class="-ml-1 inline-flex items-center justify-center rounded-md p-2 text-stone-600 transition-colors hover:bg-stone-200/50 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-700/50 dark:hover:text-stone-100"
@@ -21,15 +14,6 @@
 		<ArrowLeft class="h-5 w-5" />
 	</a>
 	<Separator orientation="vertical" class="h-6" />
-	<Button
-		variant="ghost"
-		class="cursor-pointer rounded-md text-sm text-gray-800 transition-all duration-200 active:border-accent active:bg-accent active:text-white dark:text-stone-300"
-		size="icon"
-		onclick={togglePin}
-		title="切换侧边栏固定"
-	>
-		<PanelsTopLeft />
-	</Button>
 	<div class="flex gap-2">
 		<MapTypeButton>标准</MapTypeButton>
 		<MapTypeButton>地形</MapTypeButton>

@@ -4,9 +4,8 @@
 	import { onMount } from 'svelte';
 	import Map from '$lib/components/map/map.svelte';
 	import { battles, currentBattleId } from '$lib/stores/battle-store';
-	import { activateBattleMods } from '$lib/services/plugin-registry';
-	import { get } from 'svelte/store';
 	import { registry } from '$lib/registry/mod-registry';
+	import { get } from 'svelte/store';
 
 	const battleId = page.params.battle_id ?? null;
 	const battle = get(battles).find((b) => b.id === battleId);
@@ -19,10 +18,8 @@
 	}
 
 	onMount(() => {
-		console.log('Battle page mounted with battle:', battle);
-		registry.clear();
 		if (exists && battle) {
-			activateBattleMods(battle.enabledMods);
+			registry.prepareBattleRegistry(battle.enabledMods ?? []);
 		}
 	});
 </script>

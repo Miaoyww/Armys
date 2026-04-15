@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Header from '$lib/components/header.svelte';
-	import RightSidebar from '$lib/components/sidebar/right-sidebar.svelte';
 	import Bottom from '$lib/components/bottom.svelte';
 	import LeftSidebar from '$lib/components/sidebar/left-sidebar.svelte';
 	import SettingsDialog from '$lib/components/dialog/settings/crisis/settings-dialog.svelte';
@@ -27,7 +26,6 @@
 </div>
 
 <LeftSidebar />
-<RightSidebar />
 
 <Header />
 <Bottom />

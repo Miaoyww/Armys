@@ -1,169 +1,208 @@
-/**
- * ModRegistry — 全局单例注册表，所有军种/大类/单位模板/i18n 文本均通过此注册。
- *
- * 设计原则：
- * - 引擎是"空壳"，所有数据（军种、状态名、单位类型）均来自注册表
- * - 基础游戏和 Mod 使用完全相同的 inject(ModData) 接口
- * - 后注入的数据覆盖先前的同名条目（Mod 热补丁机制）
- *
- * @example 注入"星际文明"军种
- * ```ts
- * import { registry } from '$lib/registry/mod-registry';
- *
- * registry.inject({
- *   id: 'example.stellar-civ',
- *   branches: [{ id: 'stellar_force' }],
- *   categories: [{
- *     id: 'stellar_force.vanguard',
- *     branchId: 'stellar_force',
- *     natoCode: 'AFM----',
- *     componentGroups: [{ key: 'ships', types: ['dreadnought', 'cruiser'], qualities: ['mk1', 'mk2'], defaultCount: 5 }]
- *   }],
- *   unitTemplates: [{
- *     id: 'stellar-dreadnought',
- *     name: '无畏级战舰',
- *     branchId: 'stellar_force',
- *     categoryId: 'stellar_force.vanguard',
- *     tags: ['can_strike'],
- *     stats: { maxHp: 500, maxOrg: 200, softAttack: 80, hardAttack: 120, airAttack: 60, defense: 50, speed: 3000, attackRange: 800, hardness: 0.9 }
- *   }],
- *   i18n: {
- *     'branch.stellar_force': '星际军',
- *     'category.stellar_force.vanguard': '先锋舰队',
- *     'status.moving': '跃迁',      // 覆盖基础游戏"行军"
- *     'status.attacking': '轨道轰炸' // 覆盖基础游戏"攻击"
- *   }
- * });
- * ```
- */
-
 import { writable } from 'svelte/store';
 import type { BranchDefinition, CategoryDefinition, UnitTemplate, ModData } from './types';
 
 /**
- * 每次 registry 数据变化（inject / setModEnabled）时递增。
+ * 每次 registry 有效数据变化时递增（inject system mod / prepareBattleRegistry / clearBattleRegistry）。
  * Svelte 组件订阅此 store 即可响应式感知注册表更新。
  */
 export const registryRevision = writable(0);
 
-export interface LoadedMod {
-	mod: ModData;
-	enabled: boolean;
-	/** 'system' = 基础游戏数据，'user' = 用户安装的 Mod */
-	source: 'system' | 'user';
+/** Mod 元数据（轻量，仅从 manifest 读取，供大厅列表展示） */
+export interface ModMetadata {
+	id: string;
+	name?: string;
+	version?: string;
+	author?: string;
+	description?: string;
+	type?: ModData['type'];
 }
 
-class ModRegistry {
-	/** 已注册军种（id → BranchDefinition） */
+/**
+ * 大厅 Mod 条目。切换 isGlobalEnabled 不会修改任何注册表数据，
+ * 不触发数据重建，也不影响正在进行的战局快照。
+ */
+export interface ModEntry {
+	id: string;
+	metadata: ModMetadata;
+	/** 'system' = 基础游戏，始终加载；'user' = 用户安装，需战局激活 */
+	source: 'system' | 'user';
+	/** 用户在大厅的全局勾选状态，仅用于战局创建时的预选参考 */
+	isGlobalEnabled: boolean;
+	/** 完整数据包（inject 时存入，prepareBattleRegistry 时使用） */
+	data?: ModData;
+}
+
+// ── 内部：注册表数据快照 ──────────────────────────────────────────────────────
+// 系统数据和战局数据各持一份独立快照，相互隔离。
+
+class RegistrySnapshot {
 	readonly branches = new Map<string, BranchDefinition>();
-	/** 已注册单位大类（id → CategoryDefinition） */
 	readonly categories = new Map<string, CategoryDefinition>();
-	/** 已注册单位模板（id → UnitTemplate） */
 	readonly unitTemplates = new Map<string, UnitTemplate>();
-
-	/** locale → (key → text) */
 	private readonly _i18n = new Map<string, Map<string, string>>();
-	/** 当前语言，默认 zh-CN */
-	private _locale = 'zh-CN';
-	/** 按注入顺序存储所有 Mod，含启用状态 */
-	private _mods: LoadedMod[] = [];
 
-	/**
-	 * 注入 Mod 数据包。同一 id 的 Mod 不会重复加载。
-	 * 各 Map 条目：后注入覆盖先注入。
-	 */
-	inject(mod: ModData, source: LoadedMod['source'] = 'user'): void {
-		const id = mod.id ?? `_anon_${this._mods.length}`;
-		const normalized = { ...mod, id };
-		if (this._mods.some((m) => m.mod.id === id)) return;
-
-		// faction / scenario / ruleset / campaign 需战局显式激活，默认禁用
-		// utility / dependency 以及系统数据立即激活
-		const DEFERRED_TYPES = new Set(['faction', 'scenario', 'ruleset', 'campaign']);
-		const enabledByDefault = source === 'system' || !DEFERRED_TYPES.has(normalized.type ?? '');
-
-		console.log(`Injecting mod [${source}]:`, normalized, 'Enabled by default:', enabledByDefault);
-
-		// 默认禁用Mod
-		this._mods.push({ mod: normalized, enabled: false, source });
-
-		if (enabledByDefault) {
-			// this._applyModData(normalized);
-			registryRevision.update((n) => n + 1);
-		}
+	getI18n(): Map<string, Map<string, string>> {
+		return this._i18n;
 	}
 
-	/** 实际将 mod 数据写入各 Map */
-	private _applyModData(mod: ModData): void {
-		console.log(`Applying mod data: ${mod.id} - ${mod.name}`);
-		for (const branch of mod.branches ?? []) {
-			this.branches.set(branch.id, branch);
-		}
-		for (const cat of mod.categories ?? []) {
-			this.categories.set(cat.id, cat);
-		}
-		for (const template of mod.unitTemplates ?? []) {
-			this.unitTemplates.set(template.id, template);
-		}
+	applyModData(mod: ModData, defaultLocale: string): void {
+		for (const branch of mod.branches ?? []) this.branches.set(branch.id, branch);
+		for (const cat of mod.categories ?? []) this.categories.set(cat.id, cat);
+		for (const tpl of mod.unitTemplates ?? []) this.unitTemplates.set(tpl.id, tpl);
+
 		const i18nData = mod.i18n;
-		if (i18nData) {
-			const firstVal = Object.values(i18nData)[0];
-			if (firstVal !== undefined && typeof firstVal === 'object') {
-				for (const [locale, keys] of Object.entries(
-					i18nData as Record<string, Record<string, string>>
-				)) {
-					if (!this._i18n.has(locale)) this._i18n.set(locale, new Map());
-					const localeMap = this._i18n.get(locale)!;
-					for (const [key, val] of Object.entries(keys)) localeMap.set(key, val);
-				}
-			} else {
-				if (!this._i18n.has(this._locale)) this._i18n.set(this._locale, new Map());
-				const localeMap = this._i18n.get(this._locale)!;
-				for (const [key, val] of Object.entries(i18nData as Record<string, string>))
-					localeMap.set(key, val);
+		if (!i18nData) return;
+		const firstVal = Object.values(i18nData)[0];
+		if (firstVal !== undefined && typeof firstVal === 'object') {
+			for (const [loc, keys] of Object.entries(
+				i18nData as Record<string, Record<string, string>>
+			)) {
+				if (!this._i18n.has(loc)) this._i18n.set(loc, new Map());
+				const m = this._i18n.get(loc)!;
+				for (const [k, v] of Object.entries(keys)) m.set(k, v);
 			}
+		} else {
+			if (!this._i18n.has(defaultLocale)) this._i18n.set(defaultLocale, new Map());
+			const m = this._i18n.get(defaultLocale)!;
+			for (const [k, v] of Object.entries(i18nData as Record<string, string>)) m.set(k, v);
 		}
 	}
 
-	/** 启用/禁用某个 Mod（触发全量重建） */
-	setModEnabled(id: string, enabled: boolean): void {
-		console.log(`Setting mod enabled state: id=${id}, enabled=${enabled}`);
-		const entry = this._mods.find((m) => m.mod.id === id);
-		if (!entry || entry.enabled === enabled) return;
-		entry.enabled = enabled;
-		console.log(`Mod ${enabled ? 'enabled' : 'disabled'}:`, entry.mod.name);
-		this._rebuild();
-	}
-
-	/** 重建 Map 数据（按已启用 Mod 顺序重新注入） */
-	private _rebuild(): void {
-		console.log('Rebuilding registry data from enabled mods...');
-		this.clear();
-		for (const { mod, enabled } of this._mods) {
-			console.log(`Processing mod [${enabled ? 'enabled' : 'disabled'}]:`, mod.name);
-			if (enabled) this._applyModData(mod);
-		}
-		registryRevision.update((n) => n + 1);
-	}
-
-	public clear(): void {
+	clear(): void {
 		this.branches.clear();
 		this.categories.clear();
 		this.unitTemplates.clear();
 		this._i18n.clear();
 	}
+}
 
-	/** 获取所有已加载 Mod 列表（含启用状态） */
-	getModList(): LoadedMod[] {
-		return [...this._mods];
+// ── ModRegistry ───────────────────────────────────────────────────────────────
+
+/**
+ * ModRegistry — 全局单例注册表。
+ *
+ * 两级数据隔离：
+ * - **_sys（系统快照）**：仅含 source='system' 的基础游戏数据，始终有效，不受战局影响。
+ * - **_battle（战局快照）**：含系统数据 + 本局选定用户 Mod，仅在战局期间有效。
+ *
+ * 大厅状态：`registry.branches` 等访问系统快照。
+ * 战局状态：`registry.branches` 等访问战局快照；大厅切换开关不影响此快照。
+ */
+class ModRegistry {
+	/** 系统内置数据快照（始终加载，不受战局影响） */
+	private readonly _sys = new RegistrySnapshot();
+	/** 当前激活的战局数据快照（null = 大厅模式） */
+	private _battle: RegistrySnapshot | null = null;
+	/** 所有已注册 Mod 条目（按注入顺序） */
+	private readonly _entries: ModEntry[] = [];
+	/** 当前语言，默认 zh-CN */
+	private _locale = 'zh-CN';
+
+	// ── 活跃数据代理（战局中用 _battle，大厅中用 _sys）────────────────────────
+
+	get branches(): Map<string, BranchDefinition> {
+		return (this._battle ?? this._sys).branches;
+	}
+	get categories(): Map<string, CategoryDefinition> {
+		return (this._battle ?? this._sys).categories;
+	}
+	get unitTemplates(): Map<string, UnitTemplate> {
+		return (this._battle ?? this._sys).unitTemplates;
+	}
+	private get _activeI18n(): Map<string, Map<string, string>> {
+		return (this._battle ?? this._sys).getI18n();
 	}
 
-	/** 设置当前语言（如 'zh-CN'、'en'） */
+	// ── 注册 ──────────────────────────────────────────────────────────────────
+
+	/**
+	 * 注入 Mod 数据包。同一 id 不会重复加载。
+	 * - `source='system'`：立即写入系统快照，始终生效。
+	 * - `source='user'`：仅登记元数据与数据包，**不写入任何快照**；
+	 *   须调用 `prepareBattleRegistry()` 才能在战局中生效。
+	 */
+	inject(mod: ModData, source: ModEntry['source'] = 'user'): void {
+		const id = mod.id ?? `_anon_${this._entries.length}`;
+		const normalized: ModData = { ...mod, id };
+		if (this._entries.some((e) => e.id === id)) return;
+
+		this._entries.push({
+			id,
+			metadata: {
+				id,
+				name: normalized.name,
+				version: normalized.version,
+				author: normalized.author,
+				description: normalized.description,
+				type: normalized.type
+			},
+			source,
+			isGlobalEnabled: source === 'system',
+			data: normalized
+		});
+
+		if (source === 'system') {
+			this._sys.applyModData(normalized, this._locale);
+			registryRevision.update((n) => n + 1);
+		}
+		// user mod：仅登记，不立即写入任何快照
+	}
+
+	// ── 大厅开关（不触发数据重建）────────────────────────────────────────────
+
+	/**
+	 * 更新用户在大厅对某个用户 Mod 的全局勾选状态。
+	 * 此操作**不修改任何注册表数据**，不影响正在进行的战局快照。
+	 * 系统 Mod 的开关状态不可修改。
+	 */
+	setGlobalEnabled(id: string, enabled: boolean): void {
+		const entry = this._entries.find((e) => e.id === id);
+		if (!entry || entry.source === 'system' || entry.isGlobalEnabled === enabled) return;
+		entry.isGlobalEnabled = enabled;
+		registryRevision.update((n) => n + 1);
+	}
+
+	// ── 战局激活 ──────────────────────────────────────────────────────────────
+
+	/**
+	 * 为当前战局创建隔离的数据快照并激活。
+	 * 内容 = 系统数据 + `selectedModIds` 中对应的用户 Mod。
+	 * 战局期间大厅对全局开关的修改**不会影响**此快照。
+	 *
+	 * @param selectedModIds 战局启用的用户 Mod ID 列表（空数组 = 纯基础游戏）
+	 */
+	prepareBattleRegistry(selectedModIds: string[]): void {
+		const snapshot = new RegistrySnapshot();
+		const selected = new Set(selectedModIds);
+		for (const entry of this._entries) {
+			if (!entry.data) continue;
+			if (entry.source === 'system' || selected.has(entry.id)) {
+				snapshot.applyModData(entry.data, this._locale);
+			}
+		}
+		this._battle = snapshot;
+		registryRevision.update((n) => n + 1);
+	}
+
+	/**
+	 * 退出战局，清除战局快照，回到大厅模式（仅系统数据可见）。
+	 */
+	clearBattleRegistry(): void {
+		if (!this._battle) return;
+		this._battle = null;
+		registryRevision.update((n) => n + 1);
+	}
+
+	// ── 查询 API ──────────────────────────────────────────────────────────────
+
+	/** 获取所有已注册 Mod 条目（供大厅列表展示） */
+	getModList(): ModEntry[] {
+		return [...this._entries];
+	}
+
 	setLocale(locale: string): void {
 		this._locale = locale;
 	}
-
-	/** 获取当前语言 */
 	getLocale(): string {
 		return this._locale;
 	}
@@ -171,59 +210,40 @@ class ModRegistry {
 	/**
 	 * 万能标签解析函数。
 	 * 查找顺序：当前语言 → 第一个可用语言 → defaultText → path 本身
-	 * @param path  点路径，如 "branch.army"、"status.moving"、"type.infantry.light"
-	 * @param defaultText  找不到时的回退文本
 	 */
 	getLabel(path: string, defaultText?: string): string {
+		const i18n = this._activeI18n;
 		return (
-			this._i18n.get(this._locale)?.get(path) ??
-			[...this._i18n.values()][0]?.get(path) ??
-			defaultText ??
-			path
+			i18n.get(this._locale)?.get(path) ?? [...i18n.values()][0]?.get(path) ?? defaultText ?? path
 		);
 	}
 
-	/** 按 id 查找单位模板 */
 	findTemplate(id: string): UnitTemplate | undefined {
 		return this.unitTemplates.get(id);
 	}
 
-	/** 获取指定军种下所有单位模板 */
 	getBranchTemplates(branchId: string): UnitTemplate[] {
 		return [...this.unitTemplates.values()].filter((t) => t.branchId === branchId);
 	}
-
-	/** 获取指定大类下所有单位模板 */
 	getCategoryTemplates(categoryId: string): UnitTemplate[] {
 		return [...this.unitTemplates.values()].filter((t) => t.categoryId === categoryId);
 	}
-
-	/** 获取指定军种下所有大类 */
 	getBranchCategories(branchId: string): CategoryDefinition[] {
 		return [...this.categories.values()].filter((c) => c.branchId === branchId);
 	}
 
-	/**
-	 * 解析单位模板的北约 SIDC 功能代码（7 字符）。
-	 * 优先级：template.natoCode > category.natoCode > 默认回退 "GUCI---"（地面步兵）
-	 */
 	getNatoCode(template: UnitTemplate): string {
 		if (template.natoCode) return template.natoCode;
 		const cat = this.categories.get(template.categoryId);
 		if (cat?.natoCode) return cat.natoCode;
-		return 'GUCI---'; // 默认 Ground Infantry
+		return 'GUCI---';
 	}
 
-	/**
-	 * 重置所有注册数据（通常仅用于测试或热重载）。
-	 * 调用后需重新调用 inject() 加载基础游戏数据。
-	 */
+	/** 重置所有数据（用于测试或热重载） */
 	reset(): void {
-		this.branches.clear();
-		this.categories.clear();
-		this.unitTemplates.clear();
-		this._i18n.clear();
-		this._mods.length = 0;
+		this._sys.clear();
+		this._battle = null;
+		this._entries.length = 0;
 	}
 }
 

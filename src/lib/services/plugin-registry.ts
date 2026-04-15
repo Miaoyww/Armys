@@ -275,33 +275,3 @@ export function injectToRegistry(plugin: InstalledPlugin): void {	let modData: M
 
 	registry.inject(modData, 'user');
 }
-
-/**
- * 根据战局的 enabledMods 列表激活对应 Mod，禁用其余 Mod（含系统基础包）。
- * - 若 enabledMods 为空或 undefined，则启用全部 Mod（含基础包，回到默认状态）。
- */
-export function activateBattleMods(enabledMods: string[] | undefined): void {
-	const allMods = registry.getModList();
-	console.log('Activated battle mods:', enabledMods);
-
-	if (enabledMods?.length === 0) {
-		console.log('No enabledMods specified, enabling all mods by default.');
-		for (const { source, mod } of allMods) {
-			if(mod.id && source === "system") registry.setModEnabled(mod.id, true);
-		}
-		return;
-	}
-
-	// 明确指定（含空数组）→ 系统 Mod 始终启用，用户 Mod 只启用列表中的
-	const enabledSet = new Set(enabledMods);
-	console.log('Enabled mod set:', enabledSet);
-	for (const { mod } of allMods) {
-		if (!mod.id) continue;
-		if (!enabledSet.has(mod.id)) continue;
-		registry.setModEnabled(mod.id, true);
-	}
-}
-
-export function cleanAllMods(): void {
-	registry.clear();
-}

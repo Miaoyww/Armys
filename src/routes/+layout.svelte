@@ -8,7 +8,8 @@
 	import logo from '$lib/assets/logo.svg';
 	import { browser } from '$app/environment';
 	import { dbGetAllPlugins } from '$lib/services/plugin-db';
-	import { injectToRegistry, activateBattleMods } from '$lib/services/plugin-registry';
+	import { injectToRegistry } from '$lib/services/plugin-registry';
+	import { registry } from '$lib/registry/mod-registry';
 	import { currentBattleId, battles } from '$lib/stores/battle-store';
 	import { get } from 'svelte/store';
 	let { children } = $props();
@@ -23,7 +24,7 @@
 			const battleId = get(currentBattleId);
 			if (battleId) {
 				const battle = get(battles).find((b) => b.id === battleId);
-				if (battle) activateBattleMods(battle.enabledMods);
+				if (battle) registry.prepareBattleRegistry(battle.enabledMods ?? []);
 			}
 		});
 	}

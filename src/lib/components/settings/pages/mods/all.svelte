@@ -4,23 +4,32 @@
 	import ModCard from '$lib/components/cards/settings/mod-card.svelte';
 
 	let rev = $state(0);
-	$effect(() => registryRevision.subscribe((v) => { rev = v; }));
+	$effect(() =>
+		registryRevision.subscribe((v) => {
+			rev = v;
+		})
+	);
 
-	const modList = $derived.by(() => { void rev; return registry.getModList(); });
+	const modList = $derived.by(() => {
+		void rev;
+		return registry.getModList();
+	});
 	const userMods = $derived(modList.filter((m) => m.source === 'user'));
 	const systemMods = $derived(modList.filter((m) => m.source === 'system'));
+
+	$effect(() => {
+		console.log('Mod list updated:', modList);
+	});
 </script>
 
 <div class="space-y-4">
 	<!-- 系统 Mod -->
 	{#if systemMods.length > 0}
 		<div>
-			<p class="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-				系统内置
-			</p>
+			<p class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">系统内置</p>
 			<div class="flex flex-col gap-2">
-				{#each systemMods as entry (entry.mod.id)}
-				<ModCard {entry} ontoggle={() => {}} />
+				{#each systemMods as entry (entry.metadata.id)}
+					<ModCard {entry} ontoggle={() => {}} />
 				{/each}
 			</div>
 		</div>
@@ -29,12 +38,10 @@
 	<!-- 用户 Mod -->
 	{#if userMods.length > 0}
 		<div>
-			<p class="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-				用户安装
-			</p>
+			<p class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">用户安装</p>
 			<div class="flex flex-col gap-2">
-				{#each userMods as entry (entry.mod.id)}
-				<ModCard {entry} ontoggle={() => {}} />
+				{#each userMods as entry (entry.metadata.id)}
+					<ModCard {entry} ontoggle={() => {}} />
 				{/each}
 			</div>
 		</div>
