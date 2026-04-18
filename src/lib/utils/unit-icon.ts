@@ -1,6 +1,6 @@
 import * as L from 'leaflet';
 import type { UnitTemplate, PlacedUnit, Faction } from '$lib/types';
-import { registry } from '$lib/registry/mod-registry';
+import { mods, registry } from '$lib/registry/mod-registry.svelte';
 import { getMilSymbolSVG, getMilSymbolAnchor } from './milsymbol-utils';
 
 /**
@@ -8,7 +8,7 @@ import { getMilSymbolSVG, getMilSymbolAnchor } from './milsymbol-utils';
  * 优先级：placed.natoCode > registry.getNatoCode(template)
  */
 export function resolveNatoCode(template: UnitTemplate, placed: PlacedUnit): string {
-	return placed.natoCode ?? registry.getNatoCode(template);
+	return placed.natoCode ?? mods.getNatoCode(template);
 }
 
 /** 生成北约风格 DivIcon（含 milsymbol 符号 + HP/Org 进度条 + 选中高亮环） */

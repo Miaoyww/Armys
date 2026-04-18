@@ -3,21 +3,13 @@
 
 	let { children } = $props();
 	import { battles, currentBattleId } from '$lib/stores/crisis/battle-store';
-	import { registry } from '$lib/registry/mod-registry';
+	import { mods, registry } from '$lib/registry/mod-registry.svelte';
 
 	onMount(() => {
 
     });
 
-	$effect(() => {
-		console.log('Page realoded: currentBattleId =', $currentBattleId);
-		console.log('battles =', $battles);
-		console.log(
-			'exists =',
-			$battles.some((b) => b.id === $currentBattleId)
-		);
-		console.log('registry mods =', registry.getModList());
-	});
+
 </script>
 
 <div>

@@ -13,7 +13,7 @@
 		Trash2,
 		Check
 	} from '@lucide/svelte';
-	import { registry } from '$lib/registry/mod-registry';
+	import { mods } from '$lib/registry/mod-registry.svelte';
 	import type { PlacedUnit } from '$lib/types';
 	import * as L from 'leaflet';
 	import {
@@ -184,8 +184,8 @@
 	function handleSetStatus(status: string) {
 		const targetId = contextUnitId || $selectedPlacedUnitId;
 		if (targetId) {
-			updatePlacedUnit(targetId, { status }, `单位状态变更: ${registry.getLabel('status.' + status, status)}`);
-			addLog(`单位状态变更: ${registry.getLabel('status.' + status, status)}`);
+			updatePlacedUnit(targetId, { status }, `单位状态变更: ${mods.getLabel('status.' + status, status)}`);
+			addLog(`单位状态变更: ${mods.getLabel('status.' + status, status)}`);
 		}
 		contextUnitId = null;
 		open = false;
@@ -297,7 +297,7 @@
 									<Check
 										class="mr-2 size-4 {currentStatus === status ? 'opacity-100' : 'opacity-0'}"
 									/>
-									{registry.getLabel('status.' + status, status)}
+									{mods.getLabel('status.' + status, status)}
 								</ContextMenu.Item>
 							{/each}
 						</ContextMenu.SubContent>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { UnitTemplate, PlacedUnit, Faction } from '$lib/types';
-	import { registry } from '$lib/registry/mod-registry';
+	import { mods } from '$lib/registry/mod-registry.svelte';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import {
 		Heart,
@@ -19,7 +19,7 @@
 		$props();
 
 	// 解析北约功能代码（placed.natoCode 可覆盖模板）
-	const natoCode = $derived<string>(placed.natoCode ?? registry.getNatoCode(unit));
+	const natoCode = $derived<string>(placed.natoCode ?? mods.getNatoCode(unit));
 	const side = $derived<string>(faction.side ?? 'blue');
 
 	const liveRt = $derived($runtimePositions[placed.id]);
@@ -36,7 +36,7 @@
 	);
 
 	// 大类显示标签
-	const categoryLabel = $derived(registry.getLabel('category.' + unit.categoryId, unit.categoryId));
+	const categoryLabel = $derived(mods.getLabel('category.' + unit.categoryId, unit.categoryId));
 </script>
 
 <div class="min-w-56 py-1 font-sans">
@@ -52,9 +52,9 @@
 					class="inline-block h-2 w-2 flex-shrink-0 rounded-full"
 					style="background: {faction.color};"
 				></span>
-				<span class="truncate text-xs text-stone-500"
-					>{faction.name} · {registry.getLabel('branch.' + unit.branchId, unit.branchId)}</span
-				>
+				<span class="truncate text-xs text-stone-500">
+					{faction.name} · {mods.getLabel('branch.' + unit.branchId, unit.branchId)}
+				</span>
 			</div>
 			<p class="mt-0.5 text-[10px] font-medium text-muted-foreground">
 				{categoryLabel}
@@ -146,9 +146,8 @@
 	<div class="flex flex-col gap-1">
 		<div class="flex items-center justify-between gap-4">
 			<span class="text-xs text-muted-foreground">状态</span>
-			<span class="text-xs font-medium text-foreground"
-				>{registry.getLabel('status.' + liveStatus, liveStatus)}</span
-			>
+			<span class="text-xs font-medium text-foreground">
+			{mods.getLabel('status.' + liveStatus, liveStatus)}</span>
 		</div>
 		<div class="flex items-center justify-between gap-4">
 			<MapPin class="h-3 w-3 text-muted-foreground/50" />

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { currentBattle, runtimePositions } from '$lib/stores/crisis/battle-store';
-	import { registry } from '$lib/registry/mod-registry';
+	import { mods } from '$lib/registry/mod-registry.svelte';
 	import { pendingRoute } from '$lib/stores/crisis/pending-route.store';
 	import { Button } from '$lib/components/ui/button';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
@@ -41,7 +41,7 @@
 
 	// ── 辅助函数 ──
 	function branchLabel(branch: string): string {
-		return registry.getLabel('branch.' + branch, branch);
+		return mods.getLabel('branch.' + branch, branch);
 	}
 
 	/** 从 currentBattle 查找单位名称与所属阵营颜色 */

@@ -1,33 +1,26 @@
 <script lang="ts">
 	import { Package, ShieldCheck, User } from '@lucide/svelte';
-	import type { ModEntry } from '$lib/registry/mod-registry';
-	import { registry } from '$lib/registry/mod-registry';
+	import type { ModData } from '$lib/registry/types';
+	import { registry } from '$lib/registry/mod-registry.svelte';
 	import Switch from '$lib/components/ui/switch/switch.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 
 	let {
-		entry,
-		ontoggle
+		entry
 	}: {
-		entry: ModEntry;
-		/** 切换完成后通知父组件刷新列表 */
-		ontoggle?: () => void;
+		entry: ModData;
 	} = $props();
 
-	const { metadata, source } = entry;
-	let enabled = $state(entry.isGlobalEnabled);
+	console.log('[ModCard] render:', entry.id, entry.metadata?.source);
 
-	const branchCount = entry.data?.branches?.length ?? 0;
-	const categoryCount = entry.data?.categories?.length ?? 0;
-	const templateCount = entry.data?.unitTemplates?.length ?? 0;
+	let enabled = $state(entry.metadata?.source === 'system');
+	const { metadata } = entry;
 
-	const isSystem = source === 'system';
+	const branchCount = entry?.branches?.length ?? 0;
+	const categoryCount = entry?.categories?.length ?? 0;
+	const templateCount = entry?.unitTemplates?.length ?? 0;
 
-	function handleToggle(val: boolean) {
-		enabled = val;
-		registry.setGlobalEnabled(metadata.id, val);
-		ontoggle?.();
-	}
+	const isSystem = metadata?.source === 'system';
 </script>
 
 <div
@@ -52,39 +45,31 @@
 			<div class="min-w-0">
 				<div class="flex items-center gap-1.5">
 					<span class="truncate text-sm font-semibold text-foreground"
-						>{metadata.name ?? metadata.id ?? '未知 Mod'}</span
+						>{metadata?.name ?? metadata?.id ?? '未知 Mod'}</span
 					>
 					{#if isSystem}
 						<Badge variant="secondary" class="shrink-0 text-[10px]">系统</Badge>
 					{/if}
 				</div>
 				<div class="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-					{#if metadata.version}
+					{#if metadata?.version}
 						<span>v{metadata.version}</span>
 					{/if}
-					{#if metadata.author}
+					{#if metadata?.author}
 						<span class="flex items-center gap-0.5">
 							<User class="size-3" />{metadata.author}
 						</span>
 					{/if}
-					{#if !metadata.version && !metadata.author}
+					{#if !metadata?.version && !metadata?.author}
 						<span class="italic">无版本信息</span>
 					{/if}
 				</div>
 			</div>
 		</div>
-
-		<!-- 开关（系统 Mod 不可禁用） -->
-		<Switch
-			checked={enabled}
-			disabled={isSystem}
-			onCheckedChange={handleToggle}
-			class="mt-0.5 shrink-0"
-		/>
 	</div>
 
 	<!-- 描述 -->
-	{#if metadata.description}
+	{#if metadata?.description}
 		<p class="text-xs leading-relaxed text-muted-foreground">{metadata.description}</p>
 	{/if}
 
@@ -135,39 +120,31 @@
 			<div class="min-w-0">
 				<div class="flex items-center gap-1.5">
 					<span class="truncate text-sm font-semibold text-foreground"
-						>{metadata.name ?? metadata.id ?? '未知 Mod'}</span
+						>{metadata?.name ?? metadata?.id ?? '未知 Mod'}</span
 					>
 					{#if isSystem}
 						<Badge variant="secondary" class="shrink-0 text-[10px]">系统</Badge>
 					{/if}
 				</div>
 				<div class="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-					{#if metadata.version}
+					{#if metadata?.version}
 						<span>v{metadata.version}</span>
 					{/if}
-					{#if metadata.author}
+					{#if metadata?.author}
 						<span class="flex items-center gap-0.5">
 							<User class="size-3" />{metadata.author}
 						</span>
 					{/if}
-					{#if !metadata.version && !metadata.author}
+					{#if !metadata?.version && !metadata?.author}
 						<span class="italic">无版本信息</span>
 					{/if}
 				</div>
 			</div>
 		</div>
-
-		<!-- 开关（系统 Mod 不可禁用） -->
-		<Switch
-			checked={enabled}
-			disabled={isSystem}
-			onCheckedChange={handleToggle}
-			class="mt-0.5 shrink-0"
-		/>
 	</div>
 
 	<!-- 描述 -->
-	{#if metadata.description}
+	{#if metadata?.description}
 		<p class="text-xs leading-relaxed text-muted-foreground">{metadata.description}</p>
 	{/if}
 

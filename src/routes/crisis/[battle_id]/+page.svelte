@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import Map from '$lib/components/map/map.svelte';
 	import { battles, currentBattleId } from '$lib/stores/crisis/battle-store';
-	import { registry } from '$lib/registry/mod-registry';
+	import { mods, registry, pluginsReady } from '$lib/registry/mod-registry.svelte';
 	import { get } from 'svelte/store';
 
 	const battleId = page.params.battle_id ?? null;
@@ -17,10 +17,18 @@
 		currentBattleId.set(battleId);
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		if (exists && battle) {
-			registry.prepareBattleRegistry(battle.enabledMods ?? []);
+			// 等待插件加载完成
+			await pluginsReady;
+			// 然后加载战局对应的 Mod
+			mods.loadMods(battle.enabledMods ?? []);
 		}
+	});
+
+	onDestroy(() => {
+		// 离开战局页面时清理当前战局状态
+		mods.clear();
 	});
 </script>
 

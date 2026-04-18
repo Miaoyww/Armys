@@ -12,7 +12,7 @@
 		pendingPlaceUnitId
 	} from '$lib/stores/crisis/battle-store';
 	import type { UnitTemplate, UnitSide } from '$lib/types';
-	import { registry, registryRevision } from '$lib/registry/mod-registry';
+	import { registry, mods } from '$lib/registry/mod-registry.svelte';
 	import type { CategoryDefinition, ComponentTypeGroup } from '$lib/registry/types';
 	import {
 		X,
@@ -68,20 +68,13 @@
 		editingUnitId = null;
 	});
 
-	// 桥接 registryRevision writable store → 本地 $state
-	let _rev = $state(0);
-	$effect(() => registryRevision.subscribe((v) => { _rev = v; }));
-
-	// ── 注册表衍生数据（依赖 _rev 以响应 Mod 切换） ──
-	const branchCategories = $derived.by(() => {
-		void _rev;
-		return registry.getBranchCategories($currentBranch);
-	});
+	// ── 注册表衍生数据 ──
+	const branchCategories = $derived(mods.getBranchCategories($currentBranch));
 
 	// 新建单位：待选状态
 	let pendingCategoryId = $state<string | null>(null);
 	let pendingGroupKey = $state<string>(''); // 选择的组件分组
-	let pendingType = $state<string>('');
+	let pendingType = $state<string>('')
 	let pendingQuality = $state<string>('');
 	let pendingCount = $state(0);
 
@@ -114,12 +107,20 @@
 
 	/** 确认创建单位（携带初始组件） */
 	function confirmCreateUnit() {
+		console.log('Confirm create unit with:', {
+			categoryId: pendingCategoryId,
+			groupKey: pendingGroupKey,
+			type: pendingType,
+			quality: pendingQuality,
+			count: pendingCount
+		});
 		const faction = $currentFaction;
 		if (!faction || !$currentFactionId || !pendingCategoryId) return;
-		const cat = registry.categories.get(pendingCategoryId);
+		const cat = mods.get_categories().get(pendingCategoryId);
+		console.log('Found category for ID', pendingCategoryId, ':', cat);
 		if (!cat) return;
 
-		const categoryLabel = registry.getLabel('category.' + cat.id, cat.id);
+		const categoryLabel = mods.getLabel('category.' + cat.id, cat.id);
 		const existCount = faction.units.filter((u) => u.categoryId === cat.id).length;
 		const name = `${categoryLabel}${existCount + 1}`;
 		const id = genId();
@@ -196,7 +197,7 @@
 	// 获取当前编辑单位的大类定义
 	const editingUnitCat = $derived.by(() => {
 		if (!editingUnit) return null;
-		return registry.categories.get(editingUnit.categoryId) ?? null;
+		return [...mods.get_categories().values()].find(c => c.id === editingUnit.categoryId) ?? null;
 	});
 
 	// 用于追加组件的临时状态
@@ -345,19 +346,19 @@
 									: 'border-border text-muted-foreground hover:bg-muted'}"
 								onclick={() => selectUnitCategory(cat)}
 							>
-								{registry.getLabel('category.' + cat.id, cat.id)}
+								{mods.getLabel('category.' + cat.id, cat.id)}
 							</button>
 						{/each}
 					</div>
 
 					<!-- 新建单位面板（注册表驱动的类型/质量选择） -->
 					{#if pendingCategoryId !== null}
-						{@const cat = registry.categories.get(pendingCategoryId)}
+						{@const cat = [...mods.get_categories().values()].find(c => c.id === pendingCategoryId)}
 						{#if cat}
 							<div class="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
 								{#each cat.componentGroups ?? [] as group (group.key)}
 									<p class="text-xs font-medium text-muted-foreground">
-										选择类型 · {registry.getLabel('category.' + cat.id, cat.id)}
+										选择类型 · {mods.getLabel('category.' + cat.id, cat.id)}
 									</p>
 									<div class="grid grid-cols-2 gap-1">
 										{#each group.types as typeId}
@@ -365,7 +366,7 @@
 												class="rounded-md border py-1.5 text-xs font-medium transition-all {pendingType === typeId ? 'border-transparent bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:bg-muted'}"
 												onclick={() => { pendingGroupKey = group.key; pendingType = typeId; }}
 											>
-												{registry.getLabel('type.' + group.key + '.' + typeId, typeId)}
+												{mods.getLabel('type.' + group.key + '.' + typeId, typeId)}
 											</button>
 										{/each}
 									</div>
@@ -376,7 +377,7 @@
 												class="rounded-md border py-1 text-[11px] font-medium transition-all {pendingQuality === qualityId ? 'border-transparent bg-primary text-primary-foreground' : 'border-border text-muted-foreground hover:bg-muted'}"
 												onclick={() => (pendingQuality = qualityId)}
 											>
-												{registry.getLabel('quality.' + qualityId, qualityId)}
+												{mods.getLabel('quality.' + qualityId, qualityId)}
 											</button>
 										{/each}
 									</div>

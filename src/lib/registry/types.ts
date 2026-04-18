@@ -1,6 +1,8 @@
 // ============ 动态注册表类型定义 ============
 // 所有硬编码的 Branch/Category/UnitType 枚举均已废除，统一用 string ID。
 
+import type { PluginManifest } from "$lib/services/plugin-db";
+
 /**
  * 灵活战斗属性字典。
  * 内置键：maxHp, maxOrg, softAttack, hardAttack, airAttack, defense, speed, attackRange, hardness
@@ -106,6 +108,16 @@ export interface ModCombatOverrides {
 	combatIntervalMs?: number;
 }
 
+export interface ModMetadata {
+	id: string;
+	name?: string;
+	version?: string;
+	author?: string;
+	description?: string;
+	type?: ModData['type'];
+	source: 'system' | 'user';
+}
+
 /**
  * Mod 注入数据包。
  * 基础游戏通过 registry.inject(baseData) 加载；
@@ -126,10 +138,7 @@ export interface ModCombatOverrides {
 export interface ModData {
 	/** Mod 唯一标识符（防止重复加载）。建议格式：'author.mod-name' */
 	id?: string;
-	name?: string;
-	version?: string;
-	author?: string;
-	description?: string;
+	metadata?: ModMetadata;
 	/**
 	 * Mod 类型。
 	 * - faction / scenario / ruleset / campaign：需由战局显式激活才加载
@@ -145,7 +154,6 @@ export interface ModData {
 	/** 新增/覆盖单位模板 */
 	unitTemplates?: UnitTemplate[];
 
-
 	/**
 	 * 国际化文本，支持两种格式：
 	 * - 扁平格式（单语言/兼容旧版）：{ "branch.army": "陆军" }，将作为默认语言存储
@@ -155,4 +163,5 @@ export interface ModData {
 	i18n?: Record<string, string> | Record<string, Record<string, string>>;
 	/** 战斗公式覆盖 */
 	combatOverrides?: ModCombatOverrides;
+
 }

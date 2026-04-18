@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Tabs } from 'bits-ui';
-	import { registry, registryRevision } from '$lib/registry/mod-registry';
+	import { registry, mods } from '$lib/registry/mod-registry.svelte';
 	import { cn } from '$lib/utils';
 
 	let {
@@ -13,17 +13,21 @@
 		orientation?: 'horizontal' | 'vertical';
 	} = $props();
 
-	// 桥接 writable store → 本地 $state，供 $derived 追踪
-	let rev = $state(0);
-	$effect(() => registryRevision.subscribe((v) => { rev = v; }));
-
-	// 从注册表动态获取所有军种，响应 Mod 切换
+	// 从注册表动态获取所有军种，响应 registry 变化
 	const branches = $derived.by(() => {
-		void rev;
-		return [...registry.branches.values()];
+		const allBranches = new Map<string, any>();
+
+		for (const mod of mods.getModList()) {
+			if (mod.branches) {
+				for (const branch of mod.branches) {
+					allBranches.set(branch.id, branch);
+				}
+			}
+		}
+		return [...allBranches.values()];
 	});
 
-	console.log('BranchSelector: branches updated', branches);
+	console.log('BranchSelector branches:', branches);
 </script>
 
 <Tabs.Root
@@ -51,7 +55,7 @@
 					orientation === 'vertical' ? 'w-full text-left' : 'flex-1'
 				)}
 			>
-				{registry.getLabel('branch.' + branch.id, branch.id)}
+				{mods.getLabel('branch.' + branch.id, branch.id)}
 			</Tabs.Trigger>
 		{/each}
 	</Tabs.List>

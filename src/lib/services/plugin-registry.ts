@@ -4,8 +4,8 @@
 import JSZip from 'jszip';
 import type { PluginManifest, InstalledPlugin, ModAsset } from './plugin-db';
 import { dbSavePlugin, dbSaveAsset } from './plugin-db';
-import { registry } from '$lib/registry/mod-registry';
-import type { ModData } from '$lib/registry/types';
+import { registry } from '$lib/registry/mod-registry.svelte';
+import type { ModData, ModMetadata } from '$lib/registry/types';
 
 const IMAGE_EXTENSIONS = /\.(png|jpg|jpeg|gif|webp|svg)$/i;
 
@@ -54,7 +54,10 @@ async function extractAndSaveAssets(zip: JSZip, pluginId: string): Promise<strin
  *   unitTemplates/*.json   → ModData.unitTemplates（自动合并所有文件）
  * 若 manifest.definitions 已存在，先以其为基础后再补充缺失字段。
  */
-export async function buildStructuredModData(zip: JSZip, manifest: PluginManifest): Promise<string | null> {
+export async function buildStructuredModData(
+	zip: JSZip,
+	manifest: PluginManifest
+): Promise<string | null> {
 	let modData: ModData = {};
 
 	// 若 manifest.definitions 存在，先读取作为基础
@@ -65,7 +68,11 @@ export async function buildStructuredModData(zip: JSZip, manifest: PluginManifes
 				: Object.values(manifest.definitions)[0];
 		const defFile = zip.file(defPath);
 		if (defFile) {
-			try { modData = JSON.parse(await defFile.async('string')) as ModData; } catch { /* ignore */ }
+			try {
+				modData = JSON.parse(await defFile.async('string')) as ModData;
+			} catch {
+				/* ignore */
+			}
 		}
 	}
 
@@ -73,7 +80,11 @@ export async function buildStructuredModData(zip: JSZip, manifest: PluginManifes
 	if (!modData.branches) {
 		const f = zip.file('branches.json') ?? zip.file('assets/branches.json');
 		if (f) {
-			try { modData.branches = JSON.parse(await f.async('string')); } catch { /* ignore */ }
+			try {
+				modData.branches = JSON.parse(await f.async('string'));
+			} catch {
+				/* ignore */
+			}
 		}
 	}
 
@@ -81,7 +92,11 @@ export async function buildStructuredModData(zip: JSZip, manifest: PluginManifes
 	if (!modData.categories) {
 		const f = zip.file('categories.json') ?? zip.file('assets/categories.json');
 		if (f) {
-			try { modData.categories = JSON.parse(await f.async('string')); } catch { /* ignore */ }
+			try {
+				modData.categories = JSON.parse(await f.async('string'));
+			} catch {
+				/* ignore */
+			}
 		}
 	}
 
@@ -99,7 +114,9 @@ export async function buildStructuredModData(zip: JSZip, manifest: PluginManifes
 				try {
 					const parsed = JSON.parse(await f.async('string'));
 					if (Array.isArray(parsed)) all.push(...parsed);
-				} catch { /* ignore */ }
+				} catch {
+					/* ignore */
+				}
 			}
 			if (all.length > 0) modData.unitTemplates = all as ModData['unitTemplates'];
 		}
@@ -112,9 +129,7 @@ export async function buildStructuredModData(zip: JSZip, manifest: PluginManifes
 const REGISTRY_URL =
 	'https://raw.githubusercontent.com/VetoExpress/veto-plugins/main/dist/registry.json';
 
-const STARS_URL =
-	'https://raw.githubusercontent.com/VetoExpress/veto-plugins/main/stars.json';
-	
+const STARS_URL = 'https://raw.githubusercontent.com/VetoExpress/veto-plugins/main/stars.json';
 
 /** 拉取远程注册表列表 */
 export async function fetchPluginRegistry(): Promise<PluginManifest[]> {
@@ -141,7 +156,7 @@ export async function fetchPluginStars(): Promise<Record<string, number>> {
  *       → 提取 definitions / i18n / 图片资源 → IndexedDB → ModRegistry
  */
 export async function installPlugin(manifest: PluginManifest): Promise<InstalledPlugin> {
-	console.log("Installing plugin ",manifest);
+	console.log('Installing plugin ', manifest);
 	if (!manifest.download_url) {
 		throw new Error(`插件 "${manifest.name}" 缺少 download_url，无法下载`);
 	}
@@ -155,9 +170,7 @@ export async function installPlugin(manifest: PluginManifest): Promise<Installed
 	if (manifest.hash) {
 		const actual = await sha256Hex(blob);
 		if (actual !== manifest.hash) {
-			throw new Error(
-				`插件 "${manifest.name}" 哈希校验失败，文件可能已损坏或被篡改`
-			);
+			throw new Error(`插件 "${manifest.name}" 哈希校验失败，文件可能已损坏或被篡改`);
 		}
 	}
 
@@ -203,7 +216,11 @@ export async function installPlugin(manifest: PluginManifest): Promise<Installed
 				path.endsWith('.json')
 		);
 		for (const f of i18nFiles) {
-			const locale = f.name.split('/').pop()?.replace(/\.json$/i, '') ?? '';
+			const locale =
+				f.name
+					.split('/')
+					.pop()
+					?.replace(/\.json$/i, '') ?? '';
 			if (locale && !i18nRecord[locale]) {
 				i18nRecord[locale] = await f.async('string');
 			}
@@ -231,8 +248,23 @@ export async function installPlugin(manifest: PluginManifest): Promise<Installed
 	return record;
 }
 
-/** 将 InstalledPlugin 数据注入运行时 ModRegistry */
-export function injectToRegistry(plugin: InstalledPlugin): void {	let modData: ModData = { id: plugin.id, name: plugin.manifest.name, version: plugin.manifest.version, author: plugin.manifest.author, type: plugin.manifest.type };
+/** 将 InstalledPlugin 数据注入运行时 Mods */
+export function injectToRegistry(plugin: InstalledPlugin): void {
+	let metaData: ModMetadata = {
+		id: plugin.manifest.id,
+		name: plugin.manifest.name,
+		version: plugin.manifest.version,
+		author: plugin.manifest.author,
+		description: plugin.manifest.description,
+		source: 'user'
+	};
+
+	let modData: ModData = {
+		id: plugin.id,
+		metadata: metaData,
+		type: plugin.manifest.type,
+		i18n: plugin.i18n
+	};
 
 	if (plugin.definitions) {
 		try {
@@ -241,9 +273,7 @@ export function injectToRegistry(plugin: InstalledPlugin): void {	let modData: M
 			modData = {
 				...parsed,
 				id: plugin.id,
-				name: plugin.manifest.name,
-				version: plugin.manifest.version,
-				author: plugin.manifest.author,
+				metadata: metaData,
 				type: plugin.manifest.type
 			};
 		} catch {
@@ -254,7 +284,11 @@ export function injectToRegistry(plugin: InstalledPlugin): void {	let modData: M
 	// 将所有 i18n locale 以多语言分层格式注入（plugin.i18n: locale → JSON 字符串）
 	const i18nFromPlugin: Record<string, Record<string, string>> = {};
 	for (const [locale, jsonStr] of Object.entries(plugin.i18n)) {
-		try { i18nFromPlugin[locale] = JSON.parse(jsonStr) as Record<string, string>; } catch { /* ignore */ }
+		try {
+			i18nFromPlugin[locale] = JSON.parse(jsonStr) as Record<string, string>;
+		} catch {
+			/* ignore */
+		}
 	}
 	if (Object.keys(i18nFromPlugin).length > 0) {
 		// 将 definitions 中已有的 i18n 与 plugin.i18n 合并（plugin.i18n 优先）
@@ -262,16 +296,21 @@ export function injectToRegistry(plugin: InstalledPlugin): void {	let modData: M
 		if (defI18n) {
 			const isLayered = typeof Object.values(defI18n)[0] === 'object';
 			if (isLayered) {
-				for (const [locale, keys] of Object.entries(defI18n as Record<string, Record<string, string>>)) {
+				for (const [locale, keys] of Object.entries(
+					defI18n as Record<string, Record<string, string>>
+				)) {
 					i18nFromPlugin[locale] = { ...keys, ...(i18nFromPlugin[locale] ?? {}) };
 				}
 			} else {
 				// 扁平格式视为 zh-CN（默认语言）
-				i18nFromPlugin['zh-CN'] = { ...(defI18n as Record<string, string>), ...(i18nFromPlugin['zh-CN'] ?? {}) };
+				i18nFromPlugin['zh-CN'] = {
+					...(defI18n as Record<string, string>),
+					...(i18nFromPlugin['zh-CN'] ?? {})
+				};
 			}
 		}
 		modData = { ...modData, i18n: i18nFromPlugin };
 	}
 
-	registry.inject(modData, 'user');
+	registry.load(modData);
 }

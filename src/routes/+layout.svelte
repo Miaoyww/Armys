@@ -8,11 +8,7 @@
 	import logo from '$lib/assets/logo.svg';
 	import TitleBar from '$lib/components/titlebar.svelte';
 	import { browser } from '$app/environment';
-	import { dbGetAllPlugins } from '$lib/services/plugin-db';
-	import { injectToRegistry } from '$lib/services/plugin-registry';
-	import { registry } from '$lib/registry/mod-registry';
-	import { currentBattleId, battles } from '$lib/stores/crisis/battle-store';
-	import { get } from 'svelte/store';
+
 	let { children } = $props();
 
 	// 从 IndexedDB 恢复用户已安装的插件到运行时 ModRegistry
@@ -21,12 +17,8 @@
 			for (const plugin of plugins) {
 				injectToRegistry(plugin);
 			}
-			// 注入完成后，若已进入战局则立即按战局配置激活对应 Mod
-			const battleId = get(currentBattleId);
-			if (battleId) {
-				const battle = get(battles).find((b) => b.id === battleId);
-				if (battle) registry.prepareBattleRegistry(battle.enabledMods ?? []);
-			}
+			// 标记插件加载完成
+			markPluginsReady();
 		});
 	}
 
@@ -34,6 +26,9 @@
 	import { dev } from '$app/environment';
 	import { injectAnalytics } from '@vercel/analytics/sveltekit';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+	import { dbGetAllPlugins } from '$lib/services/plugin-db';
+	import { injectToRegistry } from '$lib/services/plugin-registry';
+	import { markPluginsReady } from '$lib/registry/mod-registry.svelte';
 
 	const isTauri = browser && '__TAURI_INTERNALS__' in window;
 	if (!isTauri) {

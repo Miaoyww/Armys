@@ -1,47 +1,33 @@
 <script lang="ts">
 	import { Puzzle } from '@lucide/svelte';
-	import { registry, registryRevision } from '$lib/registry/mod-registry';
+	import { registry } from '$lib/registry/mod-registry.svelte';
 	import ModCard from '$lib/components/cards/settings/mod-card.svelte';
 
-	let rev = $state(0);
-	$effect(() =>
-		registryRevision.subscribe((v) => {
-			rev = v;
-		})
-	);
+	// 直接从 registry 获取响应式列表
+	const modList = $derived(registry.getModList());
 
-	const modList = $derived.by(() => {
-		void rev;
-		return registry.getModList();
-	});
-	const userMods = $derived(modList.filter((m) => m.source === 'user'));
-	const systemMods = $derived(modList.filter((m) => m.source === 'system'));
-
-	$effect(() => {
-		console.log('Mod list updated:', modList);
-	});
+	// 按来源分类
+	const userMods = $derived(modList.filter((m) => m.metadata?.source === 'user'));
+	const systemMods = $derived(modList.filter((m) => m.metadata?.source === 'system'));
 </script>
 
 <div class="space-y-4">
-	<!-- 系统 Mod -->
-	{#if systemMods.length > 0}
-		<div>
-			<p class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">系统内置</p>
-			<div class="flex flex-col gap-2">
-				{#each systemMods as entry (entry.metadata.id)}
-					<ModCard {entry} ontoggle={() => {}} />
-				{/each}
-			</div>
+	<!--系统内置-->
+	<div>
+		<p class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">系统内置</p>
+		<div class="flex flex-col gap-2">
+			{#each systemMods as entry (entry.id)}
+				<ModCard {entry} />
+			{/each}
 		</div>
-	{/if}
+	</div>
 
-	<!-- 用户 Mod -->
 	{#if userMods.length > 0}
 		<div>
 			<p class="mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">用户安装</p>
 			<div class="flex flex-col gap-2">
-				{#each userMods as entry (entry.metadata.id)}
-					<ModCard {entry} ontoggle={() => {}} />
+				{#each userMods as entry (entry.id || entry.metadata?.id || JSON.stringify(entry))}
+					<ModCard {entry} />
 				{/each}
 			</div>
 		</div>

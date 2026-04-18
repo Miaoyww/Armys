@@ -101,6 +101,11 @@
 			: [draft.selectedFaction, draft.selectedScenario, draft.selectedRuleset].filter(
 					(id): id is string => id !== null
 				);
+		console.log(enabledMods.length > 0 ? 'Creating battle with mods:' : 'Creating battle without mods', enabledMods);
+		if (enabledMods.length === 0) {
+			enabledMods.push("base");
+			console.warn('No mods selected for the battle.');
+		}
 		const id = createBattle(name, {
 			mapCenter: preset.center,
 			mapZoom: preset.zoom,

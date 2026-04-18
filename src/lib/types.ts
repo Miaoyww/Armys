@@ -10,7 +10,7 @@ export type {
 	ModData
 } from '$lib/registry/types';
 
-export { registry } from '$lib/registry/mod-registry';
+export { registry } from '$lib/registry/mod-registry.svelte';
 
 // ============ 阵营立场 ============
 
