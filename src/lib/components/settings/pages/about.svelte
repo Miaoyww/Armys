@@ -5,15 +5,19 @@
 	import SettingCard from '$lib/components/cards/settings/settings-card.svelte';
 	import { VETO_NAME } from '$lib/const';
 	import { isTauri } from '@tauri-apps/api/core';
+	import { fly } from 'svelte/transition';
 	const version = __APP_VERSION__;
 
 	const API_URL = 'https://api.github.com/repos/Miaoyww/Veto/releases/latest';
-	async function checkForUpdates() {
-	}
+	import favicon from '$lib/assets/favicon.png';
+	async function checkForUpdates() {}
 </script>
 
-<div class="grid h-full grid-rows-2">
+<div class="grid h-full grid-rows-2" in:fly={{ y: 8, duration: 320, opacity: 0 }}>
 	<div>
+		<div class="mb-1 flex justify-center">
+			<img src={favicon} alt="App Logo" class="h-64 w-64 rounded-md" />
+		</div>
 		<div class="mb-6 flex flex-col items-center gap-2 text-center">
 			<h2 class="text-3xl font-extrabold tracking-wide text-stone-800 dark:text-stone-100">
 				{VETO_NAME}

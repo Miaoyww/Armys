@@ -5,6 +5,7 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { interactionMode } from '$lib/stores/crisis/battle-store';
+	import { fly } from 'svelte/transition';
 
 	let { map }: { map: L.Map | undefined } = $props();
 
@@ -28,20 +29,14 @@
 	}
 
 	// 各段距离
-	const segmentDistances = $derived(
-		points.slice(1).map((p, i) => dist(points[i], p))
-	);
+	const segmentDistances = $derived(points.slice(1).map((p, i) => dist(points[i], p)));
 
 	// 当前总距离（不含预览段）
-	const totalDistance = $derived(
-		segmentDistances.reduce((sum, d) => sum + d, 0)
-	);
+	const totalDistance = $derived(segmentDistances.reduce((sum, d) => sum + d, 0));
 
 	// 预览段距离（最后一点到鼠标）
 	const previewDistance = $derived(
-		points.length > 0 && hoverLatLng
-			? dist(points[points.length - 1], hoverLatLng)
-			: null
+		points.length > 0 && hoverLatLng ? dist(points[points.length - 1], hoverLatLng) : null
 	);
 
 	// 重新绘制测量图层
@@ -82,10 +77,7 @@
 
 			// 每段中点显示距离标注
 			if (i > 0) {
-				const mid = L.latLng(
-					(points[i - 1].lat + p.lat) / 2,
-					(points[i - 1].lng + p.lng) / 2
-				);
+				const mid = L.latLng((points[i - 1].lat + p.lat) / 2, (points[i - 1].lng + p.lng) / 2);
 				const d = segmentDistances[i - 1];
 				L.marker(mid, {
 					icon: L.divIcon({
@@ -187,8 +179,14 @@
 
 {#if $interactionMode === 'measure'}
 	<!-- 底部中央浮动面板 -->
-	<div class="absolute bottom-35 left-1/2 z-[1002] -translate-x-1/2">
-		<div class="flex min-w-72 flex-col gap-2 rounded-xl border border-stone-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-stone-700 dark:bg-stone-900/90">
+	<div
+		class="absolute bottom-35 left-1/2 z-[1002] -translate-x-1/2"
+		in:fly={{ y: 16, duration: 220, opacity: 0 }}
+		out:fly={{ y: 16, duration: 160, opacity: 0 }}
+	>
+		<div
+			class="flex min-w-72 flex-col gap-2 rounded-xl border border-stone-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-stone-700 dark:bg-stone-900/90"
+		>
 			<!-- 头部 -->
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
@@ -235,14 +233,19 @@
 					{#each segmentDistances as d, i}
 						<div class="flex items-center justify-between rounded-md px-2 py-0.5 text-xs">
 							<span class="text-stone-500 dark:text-stone-400">第 {i + 1} 段</span>
-							<span class="font-mono font-medium text-stone-700 dark:text-stone-200">{formatDist(d)}</span>
+							<span class="font-mono font-medium text-stone-700 dark:text-stone-200"
+								>{formatDist(d)}</span
+							>
 						</div>
 					{/each}
 
 					{#if previewDistance !== null}
-						<div class="flex items-center justify-between rounded-md px-2 py-0.5 text-xs opacity-60">
+						<div
+							class="flex items-center justify-between rounded-md px-2 py-0.5 text-xs opacity-60"
+						>
 							<span class="text-amber-500">预览段</span>
-							<span class="font-mono font-medium text-amber-500">{formatDist(previewDistance)}</span>
+							<span class="font-mono font-medium text-amber-500">{formatDist(previewDistance)}</span
+							>
 						</div>
 					{/if}
 				</div>

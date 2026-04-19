@@ -73,8 +73,8 @@
 {#if leftBarVisible}
 	<div
 		class="sidebar-wrap absolute top-24 bottom-24 left-5 z-[1000] w-[22rem]"
-		in:fly={{ x: -20, duration: 240, easing: quintOut }}
-		out:fade={{ duration: 180 }}
+		in:fly={{ x: -8, duration: 220, opacity: 0 }}
+		out:fly={{ x: -8, duration: 320, opacity: 0 }}
 	>
 		<Card class="h-full gap-0 bg-background/75 py-0 backdrop-blur-md">
 			<CardHeader class="border-b px-5 py-4">

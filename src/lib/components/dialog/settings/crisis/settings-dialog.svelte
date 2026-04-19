@@ -4,7 +4,7 @@
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import About from '$lib/components/settings/pages/about.svelte';
 	import Battle from '$lib/components/dialog/settings/crisis/pages/battle.svelte';
-	import { fade, scale } from 'svelte/transition';
+	import { fade, fly, scale } from 'svelte/transition';
 	import { X } from '@lucide/svelte';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import Mods from '$lib/components/settings/pages/mods.svelte';
@@ -20,7 +20,8 @@
 {#if $settingOpen}
 	<div
 		class="setting-dialog absolute z-1000 flex items-center justify-center rounded-lg"
-		transition:fade={{ duration: 150 }}
+		in:fly={{ y: -8, duration: 320, opacity: 0, delay: 60 }}
+		out:fly={{ y: 8, duration: 320, opacity: 0 }}
 	>
 		<!-- 左侧边栏 -->
 		<Tabs.Tabs

@@ -3,6 +3,7 @@
 	import type { HTMLInputAttributes, HTMLInputTypeAttribute } from 'svelte/elements';
 	import HeaderLeft from '$lib/components/header/header-left.svelte';
 	import HeaderRight from '$lib/components/header/header-right.svelte';
+	import { fly } from 'svelte/transition';
 
 	type InputType = Exclude<HTMLInputTypeAttribute, 'file'>;
 	type Props = WithElementRef<
@@ -12,12 +13,15 @@
 	let { class: className, ...restProps }: Props = $props();
 </script>
 
-<div class={cn('absolute top-5 right-5 left-5 z-1000', className)}>
-    <div class="absolute left-0 top-0">
-        <HeaderLeft />
-    </div>
+<div
+	class={cn('absolute top-5 right-5 left-5 z-1000', className)}
+	in:fly={{ y: -8, duration: 320, opacity: 0, delay: 60 }}
+>
+	<div class="absolute top-0 left-0">
+		<HeaderLeft />
+	</div>
 
-    <div class="absolute right-0 top-0">
-        <HeaderRight />
-    </div>
+	<div class="absolute top-0 right-0">
+		<HeaderRight />
+	</div>
 </div>

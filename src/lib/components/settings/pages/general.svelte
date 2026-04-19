@@ -9,6 +9,7 @@
 	import { toast } from 'svelte-sonner';
 	import { Upload, Trash2, Sun, Moon } from '@lucide/svelte';
 	import { setMode, userPrefersMode } from 'mode-watcher';
+	import { fly } from 'svelte/transition';
 
 	const GROUPS = ['危机推演', '模拟大会'] as const;
 
@@ -54,7 +55,7 @@
 	}
 </script>
 
-<div class="space-y-8">
+<div class="space-y-8" in:fly={{ y: 8, duration: 320, opacity: 0 }}>
 	<!-- 界面 -->
 	<div>
 		<div class="mb-1 text-xl font-bold text-stone-800 dark:text-stone-100">界面</div>
@@ -63,7 +64,7 @@
 			<SettingCard title="界面主题" description="选择浅色或暗色界面主题。">
 				<div class="flex gap-1.5">
 					<Button
-					variant={userPrefersMode.current === 'light' ? 'secondary' : 'ghost'}
+						variant={userPrefersMode.current === 'light' ? 'secondary' : 'ghost'}
 						size="sm"
 						onclick={() => setMode('light')}
 					>
@@ -71,7 +72,7 @@
 						浅色
 					</Button>
 					<Button
-					variant={userPrefersMode.current === 'dark' ? 'secondary' : 'ghost'}
+						variant={userPrefersMode.current === 'dark' ? 'secondary' : 'ghost'}
 						size="sm"
 						onclick={() => setMode('dark')}
 					>
