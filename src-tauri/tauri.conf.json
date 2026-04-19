@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Veto",
-  "version": "0.11.0",
+  "version": "0.106.0",
   "identifier": "Veto",
   "build": {
     "frontendDist": "../build",
