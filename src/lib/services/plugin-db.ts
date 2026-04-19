@@ -1,10 +1,109 @@
+/**
+ * plugin-db.ts — IndexedDB 持久化层，存储用户已安装的插件数据。
+ *
+ * 📌 现代用法（推荐）：
+ *   import { getPluginStorage } from './plugin-db';
+ *   const storage = getPluginStorage();
+ *   await storage.savePlugin(plugin);
+ *
+ * 📌 兼容性用法（向后兼容）：
+ *   import { dbSavePlugin, dbGetPlugin } from './plugin-db';
+ *   await dbSavePlugin(plugin);
+ *
+ * DB: veto-mods  version: 2
+ * Object store: plugins    (keyPath: "id")
+ * Object store: mod_assets (keyPath: "key")  — 图片等 Blob 资源
+ */
+
 import { writable } from 'svelte/store';
+import { getPluginStorage, initPluginStorage } from './plugin-storage/plugin-storage-factory';
+import { setPluginListChangeCallback } from './plugin-storage/plugin-storage';
+
+// ─── 导出新 API ────────────────────────────────────────────────────
+export { getPluginStorage, initPluginStorage } from './plugin-storage/plugin-storage-factory';
+export type { PluginStorage } from './plugin-storage/plugin-storage';
+
+/**
+ * 存储初始化状态和错误信息
+ */
+export const storageInitialized = writable(false);
+export const storageError = writable<string | null>(null);
 
 /**
  * 每次调用 dbSavePlugin / dbDeletePlugin 后递增。
  * 组件订阅此 store 即可响应式感知已安装列表变化。
  */
 export const installedPluginsRevision = writable(0);
+
+// ─── 初始化存储和响应式回调 ──────────────────────────────────────
+
+// 在模块加载时初始化存储后端
+initPluginStorage()
+	.then(() => {
+		storageInitialized.set(true);
+		console.log('[plugin-db] Storage initialized successfully');
+	})
+	.catch((err) => {
+		const errorMsg = err instanceof Error ? err.message : String(err);
+		storageError.set(errorMsg);
+		console.error('[plugin-db] Failed to initialize storage:', err);
+	});
+
+// 绑定存储变化回调到 Svelte Store
+setPluginListChangeCallback(() => {
+	installedPluginsRevision.update((n) => n + 1);
+});
+
+/**
+ * 等待存储初始化完成，超时时间为 5 秒。
+ * 如果初始化失败会抛出错误。
+ */
+export async function ensureStorageInitialized(): Promise<void> {
+	// 如果已经初始化，立即返回
+	let initialized: boolean;
+	storageInitialized.subscribe((v) => {
+		initialized = v;
+	})();
+
+	if (initialized) return;
+
+	// 等待初始化完成或超时
+	return new Promise((resolve, reject) => {
+		const timeout = setTimeout(() => {
+			unsubscribe();
+			reject(new Error('Storage initialization timeout'));
+		}, 5000);
+
+		const unsubscribe = storageInitialized.subscribe((initialized) => {
+			if (initialized) {
+				clearTimeout(timeout);
+				unsubscribe();
+				resolve();
+			}
+		});
+
+		// 检查是否有初始化错误
+		storageError.subscribe((error) => {
+			if (error) {
+				clearTimeout(timeout);
+				unsubscribe();
+				reject(new Error(`Storage initialization failed: ${error}`));
+			}
+		});
+	});
+}
+
+export interface InstalledPlugin {
+	id: string;
+	manifest: PluginManifest;
+	/** definitions.json 的原始内容（字符串，按需解析） */
+	definitions: string | null;
+	/** i18n locale → JSON 字符串 */
+	i18n: Record<string, string>;
+	/** 已存入 mod_assets 的资源 key 列表（格式："{pluginId}/{assetPath}"） */
+	assetKeys: string[];
+	installedAt: number;
+}
 
 /**
  * plugin-db.ts — IndexedDB 持久化层，存储用户已安装的插件数据。
@@ -62,102 +161,74 @@ const DB_VERSION = 2;
 const STORE = 'plugins';
 const ASSET_STORE = 'mod_assets';
 
-function openDB(): Promise<IDBDatabase> {
-	return new Promise((resolve, reject) => {
-		const req = indexedDB.open(DB_NAME, DB_VERSION);
-		req.onupgradeneeded = () => {
-			const db = req.result;
-			if (!db.objectStoreNames.contains(STORE)) {
-				db.createObjectStore(STORE, { keyPath: 'id' });
-			}
-			if (!db.objectStoreNames.contains(ASSET_STORE)) {
-				db.createObjectStore(ASSET_STORE, { keyPath: 'key' });
-			}
-		};
-		req.onsuccess = () => resolve(req.result);
-		req.onerror = () => reject(req.error);
-	});
-}
+// ─── 向后兼容的包装函数 ────────────────────────────────────────────
 
+/**
+ * @deprecated 使用 getPluginStorage().savePlugin() 代替
+ */
 export async function dbSavePlugin(plugin: InstalledPlugin): Promise<void> {
-	const db = await openDB();
-	return new Promise((resolve, reject) => {
-		const tx = db.transaction(STORE, 'readwrite');
-		tx.objectStore(STORE).put(plugin);
-		tx.oncomplete = () => { installedPluginsRevision.update((n) => n + 1); resolve(); };
-		tx.onerror = () => reject(tx.error);
-	});
+	await ensureStorageInitialized();
+	return await getPluginStorage().savePlugin(plugin);
 }
 
+/**
+ * @deprecated 使用 getPluginStorage().getPlugin() 代替
+ */
 export async function dbGetPlugin(id: string): Promise<InstalledPlugin | undefined> {
-	const db = await openDB();
-	return new Promise((resolve, reject) => {
-		const req = db.transaction(STORE, 'readonly').objectStore(STORE).get(id);
-		req.onsuccess = () => resolve(req.result as InstalledPlugin | undefined);
-		req.onerror = () => reject(req.error);
-	});
+	await ensureStorageInitialized();
+	return await getPluginStorage().getPlugin(id);
 }
 
+/**
+ * @deprecated 使用 getPluginStorage().getAllPlugins() 代替
+ */
 export async function dbGetAllPlugins(): Promise<InstalledPlugin[]> {
-	const db = await openDB();
-	return new Promise((resolve, reject) => {
-		const req = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
-		req.onsuccess = () => resolve(req.result as InstalledPlugin[]);
-		req.onerror = () => reject(req.error);
-	});
+	await ensureStorageInitialized();
+	return await getPluginStorage().getAllPlugins();
 }
 
+/**
+ * @deprecated 使用 getPluginStorage().deletePlugin() 代替
+ */
 export async function dbDeletePlugin(id: string): Promise<void> {
-	const db = await openDB();
-	return new Promise((resolve, reject) => {
-		const tx = db.transaction(STORE, 'readwrite');
-		tx.objectStore(STORE).delete(id);
-		tx.oncomplete = () => { installedPluginsRevision.update((n) => n + 1); resolve(); };
-		tx.onerror = () => reject(tx.error);
-	});
+	await ensureStorageInitialized();
+	await getPluginStorage().deletePlugin(id);
 }
 
+/**
+ * @deprecated 使用 getPluginStorage().isInstalled() 代替
+ */
 export async function dbIsInstalled(id: string): Promise<boolean> {
-	return (await dbGetPlugin(id)) !== undefined;
+	await ensureStorageInitialized();
+	return await getPluginStorage().isInstalled(id);
 }
 
 // ─── Mod Asset CRUD ───────────────────────────────────────────────────────────
 
+/**
+ * @deprecated 使用 getPluginStorage().saveAsset() 代替
+ */
 export async function dbSaveAsset(asset: ModAsset): Promise<void> {
-	const db = await openDB();
-	return new Promise((resolve, reject) => {
-		const tx = db.transaction(ASSET_STORE, 'readwrite');
-		tx.objectStore(ASSET_STORE).put(asset);
-		tx.oncomplete = () => resolve();
-		tx.onerror = () => reject(tx.error);
-	});
+	await getPluginStorage().saveAsset(asset);
 }
 
+/**
+ * @deprecated 使用 getPluginStorage().getAsset() 代替
+ */
 export async function dbGetAsset(key: string): Promise<ModAsset | undefined> {
-	const db = await openDB();
-	return new Promise((resolve, reject) => {
-		const req = db.transaction(ASSET_STORE, 'readonly').objectStore(ASSET_STORE).get(key);
-		req.onsuccess = () => resolve(req.result as ModAsset | undefined);
-		req.onerror = () => reject(req.error);
-	});
+	return await getPluginStorage().getAsset(key);
 }
 
-/** 获取资源并创建 Object URL（调用方负责在不再需要时 URL.revokeObjectURL）*/
+/**
+ * @deprecated 使用 getPluginStorage().getAssetUrl() 代替
+ */
 export async function dbGetAssetUrl(key: string): Promise<string | null> {
-	const asset = await dbGetAsset(key);
-	if (!asset) return null;
-	return URL.createObjectURL(asset.blob);
+	return await getPluginStorage().getAssetUrl(key);
 }
 
-/** 删除某插件的全部资源（卸载时调用） */
+/**
+ * @deprecated 使用 getPluginStorage().deleteAssets() 代替
+ */
 export async function dbDeletePluginAssets(assetKeys: string[]): Promise<void> {
-	if (!assetKeys.length) return;
-	const db = await openDB();
-	return new Promise((resolve, reject) => {
-		const tx = db.transaction(ASSET_STORE, 'readwrite');
-		const store = tx.objectStore(ASSET_STORE);
-		for (const key of assetKeys) store.delete(key);
-		tx.oncomplete = () => resolve();
-		tx.onerror = () => reject(tx.error);
-	});
+	await getPluginStorage().deleteAssets(assetKeys);
 }

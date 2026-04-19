@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Veto",
   "version": "0.11.0",
-  "identifier": "com.miaoyww.veto",
+  "identifier": "Veto",
   "build": {
     "frontendDist": "../build",
     "devUrl": "http://localhost:5173",
