@@ -1,13 +1,14 @@
 <script lang="ts">
 	import SettingCard from '$lib/components/cards/settings/settings-card.svelte';
 	import { Kbd, KbdGroup } from '$lib/components/ui/kbd';
+	import * as Accordion from '$lib/components/ui/accordion/index.js';
 	import { Button } from '$lib/components/ui/button';
 	import { SHORTCUT_DEFS } from '$lib/hooks/use-keyboard-shortcuts.svelte';
 	import { clearAllBattles, importBattles } from '$lib/stores/battle/battle-store';
 	import { globalSettings } from '$lib/stores/global-settings.store';
 	import { showConfirm } from '$lib/stores/global-ui-store';
 	import { toast } from 'svelte-sonner';
-	import { Upload, Trash2, Sun, Moon } from '@lucide/svelte';
+	import { Upload, Trash2, Sun, Moon, ChevronDown } from '@lucide/svelte';
 	import { setMode, userPrefersMode } from 'mode-watcher';
 	import { fly } from 'svelte/transition';
 
@@ -112,23 +113,32 @@
 		<div class="space-y-6">
 			{#each GROUPS as group}
 				<div>
-					<div class="mb-2 text-sm font-semibold text-stone-500 dark:text-stone-400">{group}</div>
-					{#if shortcutsByGroup[group].length === 0}
-						<p class="text-xs text-muted-foreground">暂无快捷键</p>
-					{:else}
-						<div class="space-y-2">
-							{#each shortcutsByGroup[group] as def}
-								<SettingCard title={def.description}>
-									<KbdGroup>
-										{#if def.ctrl}<Kbd>Ctrl</Kbd>{/if}
-										{#if def.shift}<Kbd>Shift</Kbd>{/if}
-										{#if def.alt}<Kbd>Alt</Kbd>{/if}
-										<Kbd>{def.key}</Kbd>
-									</KbdGroup>
-								</SettingCard>
-							{/each}
-						</div>
-					{/if}
+					<Accordion.Root type="single">
+						<Accordion.Item value="item-1">
+							<Accordion.Trigger
+								class="mb-2 text-sm font-semibold text-stone-500 dark:text-stone-400"
+								>{group}</Accordion.Trigger
+							>
+							<Accordion.Content>
+								{#if shortcutsByGroup[group].length === 0}
+									<p class="text-xs text-muted-foreground">暂无快捷键</p>
+								{:else}
+									<div class="space-y-2">
+										{#each shortcutsByGroup[group] as def}
+											<SettingCard title={def.description}>
+												<KbdGroup>
+													{#if def.ctrl}<Kbd>Ctrl</Kbd>{/if}
+													{#if def.shift}<Kbd>Shift</Kbd>{/if}
+													{#if def.alt}<Kbd>Alt</Kbd>{/if}
+													<Kbd>{def.key}</Kbd>
+												</KbdGroup>
+											</SettingCard>
+										{/each}
+									</div>
+								{/if}</Accordion.Content
+							>
+						</Accordion.Item>
+					</Accordion.Root>
 				</div>
 			{/each}
 		</div>

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { ArrowLeft, Map, Puzzle, Settings, Info, Sword } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import VenuePage from '$lib/components/settings/pages/common/venue.svelte';
@@ -11,8 +10,10 @@
 	import Footer from '$lib/components/footer.svelte';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import ScrollArea from '../ui/scroll-area/scroll-area.svelte';
 
 	let activeSection = $state<Section>('venue');
+	let backUrl = $state('/');
 	const battleId = page.params.battle_id ?? null;
 	type Section = 'venue' | 'mods' | 'general' | 'about' | 'battle';
 
@@ -31,6 +32,7 @@
 	onMount(() => {
 		if (battleId) {
 			NAV_ITEMS.unshift({ key: 'battle', label: '战役', icon: Sword });
+			backUrl = `/battle/${battleId}`;
 			return;
 		}
 		NAV_ITEMS.unshift({ key: 'venue', label: '会场', icon: Map });
@@ -40,15 +42,18 @@
 <div
 	class="min-h-screen w-screen bg-gradient-to-br from-slate-100 to-stone-200 dark:from-slate-900 dark:to-stone-900"
 >
-	<!-- 顶栏：在 fly 动画容器外，sticky 才能正常工作 -->
-	<header class="sticky top-0 z-10 flex items-center gap-3 py-4 pl-5 backdrop-blur-sm">
-		<Button variant="ghost" size="icon" onclick={() => goto('/')} class="cursor-pointer">
-			<ArrowLeft size={18} />
-		</Button>
-		<h1 class="text-lg font-semibold text-stone-700 dark:text-stone-200">设置</h1>
-	</header>
+	<div class="blur-backdrop ml-5 flex w-fit items-center gap-3 rounded-lg bg-background/80 p-2">
+		<a
+			href={backUrl}
+			class="inline-flex items-center justify-center rounded-md p-2 text-stone-600 transition-colors hover:bg-stone-200/50 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-700/50 dark:hover:text-stone-100"
+		>
+			<ArrowLeft class="h-5 w-5" />
+		</a>
+		<!-- 如果这个 div 没有任何内容，可以考虑移除或者保留作为间距占位 -->
+		<p class="mr-5 flex gap-2">返回</p>
+	</div>
 
-	<div class="flex w-screen flex-col" in:fly={{ y: 16, duration: 300, opacity: 0 }}>
+	<div class="flex w-screen flex-col " in:fly={{ y: 16, duration: 300, opacity: 0 }}>
 		<!-- 主体 -->
 		<div class="flex gap-6 p-5 pb-6">
 			<!-- 左侧导航 -->
@@ -66,14 +71,16 @@
 			</div>
 
 			<!-- 右侧内容 -->
-			<div class="blur-backdrop flex-1 rounded-lg">
-				<div class="p-6">
-					{#if activeSection === 'venue'}<VenuePage />{/if}
-					{#if activeSection === 'battle'}<BattlePage />{/if}
-					{#if activeSection === 'mods'}<ModsPage />{/if}
-					{#if activeSection === 'general'}<GeneralPage />{/if}
-					{#if activeSection === 'about'}<AboutPage />{/if}
-				</div>
+			<div class="blur-backdrop flex-1 rounded-lg h-[calc(100vh-160px)]">
+				<ScrollArea class="h-full w-full">
+					<div class="p-6">
+						{#if activeSection === 'venue'}<VenuePage />{/if}
+						{#if activeSection === 'battle'}<BattlePage />{/if}
+						{#if activeSection === 'mods'}<ModsPage />{/if}
+						{#if activeSection === 'general'}<GeneralPage />{/if}
+						{#if activeSection === 'about'}<AboutPage />{/if}
+					</div>
+				</ScrollArea>
 			</div>
 		</div>
 

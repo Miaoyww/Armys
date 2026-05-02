@@ -21,6 +21,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { fly } from 'svelte/transition';
 
 	const DISPLAY_SCALES = [60, 3600, 86400] as const;
 	const battleId = page.params.battle_id ?? null;
@@ -117,7 +118,7 @@
 	const enabledEventCount = $derived(eventSettingsDraft.filter((e) => e.enabled).length);
 </script>
 
-<div class="space-y-6 pb-10">
+<div class="space-y-6 pb-10" in:fly={{ y: 8, duration: 320, opacity: 0 }}>
 	<!-- 基本信息 -->
 	<div>
 		<div class="mb-3 text-xl font-bold">基本信息</div>
