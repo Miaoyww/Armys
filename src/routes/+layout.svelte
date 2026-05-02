@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import '../css/components.css';
 	import '$units'; // 初始化 ModRegistry 基础数据
 	import MyAlertDialog from '$lib/components/dialog/my-alert-dialog.svelte';
 	import { Toaster } from '$lib/components/ui/sonner';

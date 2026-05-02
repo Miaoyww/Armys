@@ -218,7 +218,7 @@
 </script>
 
 <Card
-	class="absolute z-[100] h-full w-[24rem] gap-0 py-0 bg-background/75 backdrop-blur-md"
+	class="veto-sidebar absolute z-[100] h-full w-[24rem] gap-0"
 >
 	<CardHeader class="border-b px-5 py-4">
 		<CardTitle class="flex items-center gap-2 text-sm font-semibold tracking-wide">

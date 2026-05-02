@@ -19,9 +19,7 @@
 		in:fly={{ y: -16, duration: 220, opacity: 0 }}
 		out:fly={{ y: -16, duration: 160, opacity: 0 }}
 	>
-		<div
-			class="flex items-center gap-3 rounded-xl border border-stone-200 bg-white/90 px-4 py-2.5 shadow-md backdrop-blur-sm dark:border-stone-700 dark:bg-stone-900/90"
-		>
+		<div class="veto-popup flex items-center gap-3 px-4 py-2.5">
 			{#if $interactionMode === 'place'}
 				<MapPin class="h-4 w-4 text-stone-600 dark:text-stone-400" />
 				<span class="text-sm text-stone-700 dark:text-stone-300">点击地图放置单位</span>

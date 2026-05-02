@@ -12,8 +12,8 @@
 
 <div in:fly={{ y: 8, duration: 320, opacity: 0 }}>
 	<ScrollArea>
-		<div class="mb-1 text-xl font-bold text-stone-800 dark:text-stone-100">会场</div>
-		<p class="mb-4 text-sm text-muted-foreground">配置新建战局时的默认值。</p>
+		<div class="mb-1 text-xl font-bold">会场</div>
+		<p class="mb-4 text-sm">配置新建战局时的默认值。</p>
 		<div class="space-y-3">
 			<SettingCard title="默认图标风格" description="新建战局时使用的单位图标样式。">
 				<div class="flex gap-2">

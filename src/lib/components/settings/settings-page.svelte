@@ -42,7 +42,7 @@
 <div
 	class="min-h-screen w-screen bg-gradient-to-br from-slate-100 to-stone-200 dark:from-slate-900 dark:to-stone-900"
 >
-	<div class="blur-backdrop ml-5 flex w-fit items-center gap-3 rounded-lg bg-background/80 p-2">
+	<div class="veto-page ml-5 w-fit gap-3">
 		<a
 			href={backUrl}
 			class="inline-flex items-center justify-center rounded-md p-2 text-stone-600 transition-colors hover:bg-stone-200/50 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-700/50 dark:hover:text-stone-100"
@@ -53,11 +53,11 @@
 		<p class="mr-5 flex gap-2">返回</p>
 	</div>
 
-	<div class="flex w-screen flex-col " in:fly={{ y: 16, duration: 300, opacity: 0 }}>
+	<div class="flex w-screen flex-col" in:fly={{ y: 16, duration: 300, opacity: 0 }}>
 		<!-- 主体 -->
 		<div class="flex gap-6 p-5 pb-6">
 			<!-- 左侧导航 -->
-			<div class="blur-backdrop flex w-36 shrink-0 flex-col gap-1 self-start rounded-lg p-2">
+			<div class="veto-page w-36 shrink-0 flex-col gap-1 self-start">
 				{#each NAV_ITEMS as item}
 					<Button
 						class="w-full cursor-pointer justify-start gap-2 px-3"
@@ -71,7 +71,7 @@
 			</div>
 
 			<!-- 右侧内容 -->
-			<div class="blur-backdrop flex-1 rounded-lg h-[calc(100vh-160px)]">
+			<div class="veto-page h-[calc(100vh-160px)] flex-1 rounded-lg">
 				<ScrollArea class="h-full w-full">
 					<div class="p-6">
 						{#if activeSection === 'venue'}<VenuePage />{/if}

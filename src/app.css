@@ -39,18 +39,6 @@ body::-webkit-scrollbar {
 	display: none;
 }
 
-/* background colours are defined in theme.css; only structural rules here */
-.blur-backdrop {
-	-webkit-backdrop-filter: blur(10px);
-	backdrop-filter: blur(10px);
-}
-
-.blur-setting-card {
-	-webkit-backdrop-filter: blur(10px);
-	backdrop-filter: blur(10px);
-}
-
-
 :root {
 	--radius: 0.625rem;
 	--background: oklch(1 0 0);

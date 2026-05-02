@@ -17,7 +17,7 @@
 
 <div
 	class={cn(
-		'flex items-center gap-3 rounded-lg  bg-background/80 p-2 shadow-lg backdrop-blur-md',
+		'veto-card gap-3',
 		className
 	)}
 >

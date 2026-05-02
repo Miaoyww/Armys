@@ -35,9 +35,15 @@ importers:
       milsymbol:
         specifier: ^3.0.4
         version: 3.0.4
+      postcss:
+        specifier: ^8.5.13
+        version: 8.5.13
       sveaflet:
         specifier: ^0.1.4
         version: 0.1.4(@algolia/client-search@5.40.1)(leaflet@1.9.4)(search-insights@2.17.3)(svelte@5.40.2)
+      svelte-add:
+        specifier: ^2.7.3
+        version: 2.7.3
     devDependencies:
       '@inlang/paraglide-js':
         specifier: ^2.3.2
@@ -598,6 +604,21 @@ packages:
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
+
+  '@svelte-add/ast-manipulation@2.2.4':
+    resolution: {integrity: sha512-232b8ii+jGq7lGl8LMmlG8wAq300RIxgT3lcnbfPOGyIttkjcYO6OvXVjHQoa9bnEU5veCByLyHO3nAwxlDrvA==}
+    deprecated: svelte-add has be merged together with create-svelte to become the Svelte CLI sv. The work continues in the sv repo over at https://github.com/sveltejs/cli
+
+  '@svelte-add/ast-tooling@2.1.7':
+    resolution: {integrity: sha512-oE1s51UUYQ+vxnjMZl2qKE4EbbZlG7SjtbZ290BIW2MBaFXvgtqLVOZDxqE1pgMzHNfw1tAtSLKLLY1w7AeELQ==}
+    deprecated: svelte-add has be merged together with create-svelte to become the Svelte CLI sv. The work continues in the sv repo over at https://github.com/sveltejs/cli
+
+  '@svelte-add/config@1.5.2':
+    resolution: {integrity: sha512-u5r4qMhpxvrffytROYWH0DpGfLhmpTtlhg4fH98guHBoCtupz5r1Sjjl2aRlckdLgRi2JgjHq6S+0QY/0Lg14w==}
+
+  '@svelte-add/core@2.10.4':
+    resolution: {integrity: sha512-DnrX9JQOIdZxdd7E6rFe0ASYwkfQXVJu7Kf7Z/RhBO/h2f4K3kWnVprZ7LVc4+XuLiSGvMaK6mthV3P7OdjQyA==}
+    deprecated: svelte-add has be merged together with create-svelte to become the Svelte CLI sv. The work continues in the sv repo over at https://github.com/sveltejs/cli
 
   '@sveltejs/acorn-typescript@1.0.6':
     resolution: {integrity: sha512-4awhxtMh4cx9blePWl10HRHj8Iivtqj+2QdDCSMDzxG+XKa9+VCNupQuCuvzEhYPzZSrX+0gC+0lHA/0fFKKQQ==}
@@ -1398,8 +1419,8 @@ packages:
     resolution: {integrity: sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w==}
     engines: {node: '>=4'}
 
-  postcss@8.5.6:
-    resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
+  postcss@8.5.13:
+    resolution: {integrity: sha512-qif0+jGGZoLWdHey3UFHHWP0H7Gbmsk8T5VEqyYFbWqPr1XqvLGBbk/sl8V5exGmcYJklJOhOQq1pV9IcsiFag==}
     engines: {node: ^10 || ^12 || >=14}
 
   preact@10.27.2:
@@ -1594,6 +1615,11 @@ packages:
     peerDependencies:
       leaflet: ^1.9.4
       svelte: ^4.0.0 || ^5.0.0-next.0
+
+  svelte-add@2.7.3:
+    resolution: {integrity: sha512-5dsj16Nd6UGwIpmeg3uoPK2XDPzcuZt0SQWXLNzJW2G7T5M+kcI08mNc3H5QCL0dsgb+AG1nPyq+ypF3pAOY5A==}
+    deprecated: svelte-add has be merged together with create-svelte to become the Svelte CLI sv. The work continues in the sv repo over at https://github.com/sveltejs/cli
+    hasBin: true
 
   svelte-check@4.3.3:
     resolution: {integrity: sha512-RYP0bEwenDXzfv0P1sKAwjZSlaRyqBn0Fz1TVni58lqyEiqgwztTpmodJrGzP6ZT2aHl4MbTvWP6gbmQ3FOnBg==}
@@ -2186,6 +2212,19 @@ snapshots:
   '@sqlite.org/sqlite-wasm@3.48.0-build4': {}
 
   '@standard-schema/spec@1.0.0': {}
+
+  '@svelte-add/ast-manipulation@2.2.4':
+    dependencies:
+      '@svelte-add/ast-tooling': 2.1.7
+
+  '@svelte-add/ast-tooling@2.1.7': {}
+
+  '@svelte-add/config@1.5.2': {}
+
+  '@svelte-add/core@2.10.4':
+    dependencies:
+      '@svelte-add/ast-manipulation': 2.2.4
+      '@svelte-add/ast-tooling': 2.1.7
 
   '@sveltejs/acorn-typescript@1.0.6(acorn@8.15.0)':
     dependencies:
@@ -2848,7 +2887,7 @@ snapshots:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
 
-  postcss@8.5.6:
+  postcss@8.5.13:
     dependencies:
       nanoid: 3.3.11
       picocolors: 1.1.1
@@ -3007,6 +3046,11 @@ snapshots:
       - react-dom
       - search-insights
 
+  svelte-add@2.7.3:
+    dependencies:
+      '@svelte-add/config': 1.5.2
+      '@svelte-add/core': 2.10.4
+
   svelte-check@4.3.3(picomatch@4.0.3)(svelte@5.40.2)(typescript@5.9.3):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
@@ -3149,7 +3193,7 @@ snapshots:
       esbuild: 0.25.11
       fdir: 6.5.0(picomatch@4.0.3)
       picomatch: 4.0.3
-      postcss: 8.5.6
+      postcss: 8.5.13
       rollup: 4.52.4
       tinyglobby: 0.2.15
     optionalDependencies:

@@ -185,7 +185,7 @@
 		out:fly={{ y: 16, duration: 160, opacity: 0 }}
 	>
 		<div
-			class="flex min-w-72 flex-col gap-2 rounded-xl border border-stone-200 bg-white/90 p-3 shadow-lg backdrop-blur-sm dark:border-stone-700 dark:bg-stone-900/90"
+			class="veto-popup flex min-w-72 flex-col gap-2 p-3"
 		>
 			<!-- 头部 -->
 			<div class="flex items-center justify-between">
@@ -220,7 +220,7 @@
 				</div>
 			</div>
 
-			<Separator class="dark:bg-stone-700" />
+			<Separator class="dark:bg-stone-400" />
 
 			{#if points.length === 0}
 				<div class="flex items-center gap-2 py-1 text-xs text-stone-400 dark:text-stone-500">

@@ -26,11 +26,11 @@
 </script>
 
 <div
-	class="bottom-wrap absolute right-5 bottom-5 left-5 z-1000 flex items-center justify-center"
+	class="absolute right-5 bottom-5 left-5 z-1000 flex items-center justify-center"
 	in:fly={{ y: 8, duration: 320, opacity: 0, delay: 60 }}
 >
 	<div
-		class="bottom-toolbar flex h-12 items-center justify-center gap-2 rounded-lg bg-background/75 px-3 py-2 backdrop-blur-md"
+		class="veto-card h-12 gap-2"
 	>
 		<Button
 			variant="ghost"
@@ -68,30 +68,9 @@
 	</div>
 
 	<div
-		class="coordinates absolute right-0 flex h-12 items-center rounded-lg bg-background/75 px-4 py-2 backdrop-blur-md"
+		class="veto-card absolute right-0 h-12"
 	>
 		坐标: {$coords.lat.toFixed(5)}, {$coords.lng.toFixed(5)}
 	</div>
 </div>
 
-<style>
-	.bottom-wrap {
-		gap: 30px;
-	}
-
-	.bottom-toolbar,
-	.coordinates {
-		box-shadow: var(--shadow);
-	}
-
-	.coordinates {
-		font-size: 1rem;
-		color: var(--foreground);
-		white-space: nowrap;
-	}
-
-	.settings-wrap :global(button) {
-		height: 2.25rem;
-		width: 2.25rem;
-	}
-</style>

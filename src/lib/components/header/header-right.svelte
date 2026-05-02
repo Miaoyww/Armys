@@ -27,15 +27,11 @@
 </script>
 
 <div class={cn('flex flex-col items-end', className)}>
-	<div
-		class="rounded-t-xl rounded-bl-xl border-b border-white/5 bg-background/80 p-2 shadow-lg backdrop-blur-md"
-	>
+	<div class="veto-card">
 		<ControlBar />
 	</div>
 
-	<div
-		class="-mt-[1px] flex gap-4 rounded-tl-none rounded-b-xl border-t border-white/10 bg-background/80 px-3 py-1.5 shadow-lg backdrop-blur-md"
-	>
+	<div class="veto-card gap-4 px-3 py-1.5">
 		<div class="flex flex-col gap-0.5">
 			<div class="status-label text-[10px] tracking-wider uppercase opacity-60">缩放</div>
 			<div class="status-value font-mono text-xs">{$zoom}</div>

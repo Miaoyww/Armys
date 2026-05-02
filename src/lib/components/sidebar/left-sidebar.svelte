@@ -72,11 +72,11 @@
 
 {#if leftBarVisible}
 	<div
-		class="sidebar-wrap absolute top-24 bottom-24 left-5 z-[1000] w-[22rem]"
+		class="absolute top-24 bottom-24 left-5 z-[1000] w-[22rem]"
 		in:fly={{ x: -8, duration: 220, opacity: 0 }}
 		out:fly={{ x: -8, duration: 320, opacity: 0 }}
 	>
-		<Card class="h-full gap-0 bg-background/75 py-0 backdrop-blur-md">
+		<Card class="veto-sidebar h-full gap-0">
 			<CardHeader class="border-b px-5 py-4">
 				<CardTitle class="flex items-center gap-2 text-sm font-semibold tracking-wide">
 					<Swords class="h-4 w-4 text-red-500" />
